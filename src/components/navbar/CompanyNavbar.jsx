@@ -2,19 +2,43 @@ import * as React from "react";
 import { NavLink } from "react-router-dom";
 import { RiMenuFoldLine, RiMenuUnfoldLine } from "react-icons/ri";
 import { BiUserCircle } from "react-icons/bi";
+import { IoMdLogOut } from 'react-icons/io';
+//import { useDispatch } from 'react-redux';
+//import { logout } from '../actions/authActions';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const CompanyNavbar = () => {
   const [Menu, setMenu] = React.useState(false);
+  //const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [isLogoutHovered, setIsLogoutHovered] = useState(false);
+
+  const handleLogout = () => {
+    //dispatch(logout());
+    navigate("/");
+  };
+
   return (
     <div className="border-b mb-6 py-4 px-6 flex justify-between items-center gap-10  w-full mr-3">
       <div className="fixed flex items-center text-white font-bold text-3xl border-gray-400 top-0 left-0 w-full h-14 bg-[#1b3365]">
-        &nbsp; &nbsp; ITS
-        <BiUserCircle
-          className="absolute  top-4 right-10  cursor-pointer hover:text-[#9ad2ff] "
+      &nbsp; &nbsp; ITS
+      <div
+        className="flex items-center absolute top-4 right-10 space-x-2 cursor-pointer"
+        onMouseEnter={() => setIsLogoutHovered(true)}
+        onMouseLeave={() => setIsLogoutHovered(false)}
+      >
+        <BiUserCircle size={30} color="white" />
+        <IoMdLogOut
           size={30}
-          color={"white"}
+          color={isLogoutHovered ? "red" : "white"}
+          onClick={handleLogout}
+          style={{
+            transition: "color 0.3s ease-in-out",
+          }}
         />
       </div>
+    </div>
       <div className="fixed top-16 left-3" onClick={() => setMenu(!Menu)}>
         <RiMenuUnfoldLine className="cursor-pointer" size={35} />
       </div>
@@ -47,12 +71,14 @@ const CompanyNavbar = () => {
               Internship Applications
             </NavLink>
           </li>
-          {/* <li className="">
-            <NavLink className="inline-block ml-5  text-xl border-b-2 border-white hover:text-green-700 transition-all ease-in-out" to={"/Interview"}>Interviews</NavLink>
-          </li>
           <li className="">
-            <NavLink className="inline-block ml-5  text-xl border-b-2 border-white hover:text-green-700 transition-all ease-in-out"to={"/Tickets"}>Tickets</NavLink>
-          </li>               */}
+            <NavLink
+              className="inline-block ml-5  text-xl border-white hover:text-[#9ad2ff]  transition-all ease-in-out"
+              to={"/company/application"}
+            >
+              Approved Applications
+            </NavLink>
+          </li>
         </ul>
       </div>
     </div>

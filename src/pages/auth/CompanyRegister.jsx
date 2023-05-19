@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 const CompanyRegister = () => {
   const onFinish = async (values) => {
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(values)
+        body: JSON.stringify(values),
       });
 
       const data = await response.json();
@@ -83,11 +83,15 @@ const CompanyRegister = () => {
             {/* Password */}
             <Form.Item
               label="Password"
-              name={"password"}
+              name="password"
               rules={[
                 {
                   required: true,
                   message: "Password must be required!",
+                },
+                {
+                  min: 6,
+                  message: "Password must be at least 6 characters!",
                 },
               ]}
             >

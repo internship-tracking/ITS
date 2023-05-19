@@ -1,27 +1,25 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { Link } from "react-router-dom";
-import { login } from '../../redux/authSlice';
+import { login } from "../../redux/authSlice";
 
 const CompanyLogin = () => {
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const { email, password } = formData; // Destructure email and password from formData
 
   const handleSubmit = () => {
-
     dispatch(login(email, password)).then(() => {
       //  navigate to ...
-      navigate('/');
+      navigate("/company");
     });
   };
 
@@ -41,19 +39,31 @@ const CompanyLogin = () => {
                 },
               ]}
             >
-              <Input onChange={e => setFormData({ ...formData, email: e.target.value })} />
+              <Input
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
             </Form.Item>
             <Form.Item
               label="Password"
-              name={"password"}
+              name="password"
               rules={[
                 {
                   required: true,
                   message: "Password must be required!",
                 },
+                {
+                  min: 6,
+                  message: "Password must be at least 6 characters!",
+                },
               ]}
             >
-              <Input.Password onChange={e => setFormData({ ...formData, password: e.target.value })} />
+              <Input.Password
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+              />
             </Form.Item>
             <Form.Item name={"remember"} valuePropName="checked">
               <div className="flex justify-between items-center">
