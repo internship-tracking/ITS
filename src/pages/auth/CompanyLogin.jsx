@@ -47,7 +47,7 @@ const CompanyLogin = () => {
             </Form.Item>
             <Form.Item
               label="Password"
-              name="password"
+              name= {"password"}
               rules={[
                 {
                   required: true,

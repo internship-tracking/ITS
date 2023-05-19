@@ -83,7 +83,7 @@ const CompanyRegister = () => {
             {/* Password */}
             <Form.Item
               label="Password"
-              name="password"
+              name={"password"}
               rules={[
                 {
                   required: true,
