@@ -2,11 +2,13 @@ import * as React from "react";
 import { NavLink } from "react-router-dom";
 import { RiMenuFoldLine, RiMenuUnfoldLine } from "react-icons/ri";
 import { BiUserCircle } from "react-icons/bi";
-import { IoMdLogOut } from 'react-icons/io';
+import { IoMdLogOut } from "react-icons/io";
+import { RiLockPasswordLine } from "react-icons/ri";
 //import { useDispatch } from 'react-redux';
 //import { logout } from '../actions/authActions';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const CompanyNavbar = () => {
   const [Menu, setMenu] = React.useState(false);
@@ -22,23 +24,29 @@ const CompanyNavbar = () => {
   return (
     <div className="border-b mb-6 py-4 px-6 flex justify-between items-center gap-10  w-full mr-3">
       <div className="fixed flex items-center text-white font-bold text-3xl border-gray-400 top-0 left-0 w-full h-14 bg-[#1b3365]">
-      &nbsp; &nbsp; ITS
-      <div
-        className="flex items-center absolute top-4 right-10 space-x-2 cursor-pointer"
-        onMouseEnter={() => setIsLogoutHovered(true)}
-        onMouseLeave={() => setIsLogoutHovered(false)}
-      >
-        <BiUserCircle size={30} color="white" />
-        <IoMdLogOut
-          size={30}
-          color={isLogoutHovered ? "red" : "white"}
-          onClick={handleLogout}
-          style={{
-            transition: "color 0.3s ease-in-out",
-          }}
-        />
+        &nbsp; &nbsp; ITS
+        <div className="flex items-center absolute top-4 right-10 space-x-2 cursor-pointer">
+        <Link to="/company/profile">
+            <BiUserCircle size={30} color="white" />
+          </Link>
+          <Link to="/company/password">
+          <RiLockPasswordLine size={30} color="white" />
+          </Link>
+          <div
+          onMouseEnter={() => setIsLogoutHovered(true)}
+          onMouseLeave={() => setIsLogoutHovered(false)}
+        >
+          <IoMdLogOut
+            size={30}
+            color={isLogoutHovered ? "red" : "white"}
+            onClick={handleLogout}
+            style={{
+              transition: "color 0.3s ease-in-out",
+            }}
+          />
+        </div>
+        </div>
       </div>
-    </div>
       <div className="fixed top-16 left-3" onClick={() => setMenu(!Menu)}>
         <RiMenuUnfoldLine className="cursor-pointer" size={35} />
       </div>
