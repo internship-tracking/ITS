@@ -36,7 +36,7 @@ const Application = () => {
   const columns = [
     {
       key: "1",
-      title: "Name",
+      title: "Full Name",
       dataIndex: "name",
     },
     {
@@ -196,7 +196,7 @@ const Application = () => {
   return (
     <>
       <CompanyNavbar />
-      <div className="px-6 py-6">
+      <div className="px-6 py-6 w-4/5 mx-auto">
         <h1 className="text-4xl font-bold text-center mb-4">
           Internship Applications
         </h1>

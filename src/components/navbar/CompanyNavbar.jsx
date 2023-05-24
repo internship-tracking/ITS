@@ -82,7 +82,7 @@ const CompanyNavbar = () => {
           <li className="">
             <NavLink
               className="inline-block ml-5  text-xl border-white hover:text-[#9ad2ff]  transition-all ease-in-out"
-              to={"/company/application"}
+              to={"/company/approved"}
             >
               Approved Applications
             </NavLink>

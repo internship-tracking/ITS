@@ -2,7 +2,7 @@ import React from "react";
 import CompanyNavbar from "../../components/navbar/CompanyNavbar";
 import { Button, Modal, DatePicker, Form, Input, Select } from "antd";
 import { useState } from "react";
-import { MdWarning, MdCheckCircle } from "react-icons/md";
+import { MdWarning} from "react-icons/md";
 const { RangePicker } = DatePicker;
 
 const NewApplication = () => {
@@ -188,7 +188,7 @@ const NewApplication = () => {
                 >
                   <p>Do you approve it?</p>
                   <p>
-                    When you create an application, yo can not edit it again.
+                    When you create an application, you can not edit it again.
                   </p>
                 </Modal>
               </Form.Item>

@@ -8,6 +8,7 @@ import Application from "./pages/company/Application";
 import CompanyPassword from "./pages/company/CompanyPassword";
 import CompanyProfile from "./pages/company/CompanyProfile";
 import Company from "./pages/company/Company";
+import ApprovedApplication from "./pages/company/ApprovedApplication";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/company/new" element={<NewApplication />} />
           <Route path="/company/application" element={<Application />} />
           <Route path="/company/password" element={<CompanyPassword />} />
+          <Route path="/company/approved" element={<ApprovedApplication />} />
         </Routes>
       </BrowserRouter>
     </>
