@@ -11,7 +11,7 @@ const HomePage2 = () => {
                 Company Register
               </Button>
             </Link>
-            <Link to={"/company/login"}>
+            <Link to={"/supervisor/register"}>
               <Button className="w-full mb-6 bg-[#1b3365] text-white hover:text-[#9ad2ff]" size="large">
                 Internship Supervisor Register
               </Button>

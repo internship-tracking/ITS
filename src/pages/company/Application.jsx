@@ -1,9 +1,12 @@
 import CompanyNavbar from "../../components/navbar/CompanyNavbar";
-import { Table, Modal, Button } from "antd";
+import { Table, Modal, Input } from "antd";
 import { useState } from "react";
-import { DeleteOutlined, EyeOutlined, CheckSquareFilled, CloseSquareFilled } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 
 const Application = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingApplication, setEditingApplication] = useState(null);
   const [dataSource, setDataSource] = useState([
     {
       id: 1,
@@ -30,13 +33,10 @@ const Application = () => {
       type: "Compulsory",
     },
   ]);
-
-  const [modalVisible, setModalVisible] = useState(false);
-
   const columns = [
     {
       key: "1",
-      title: "Full Name",
+      title: "Name",
       dataIndex: "name",
     },
     {
@@ -46,169 +46,122 @@ const Application = () => {
     },
     {
       key: "3",
-      title: "View",
-      render: (record) => (
-        <Button
-          type="link"
-          onClick={() => {
-            setModalVisible(true);
-          }}
-        >
-          <EyeOutlined style={{ color: "blue", fontSize: 20 }}/>
-        </Button>
-        
-      ),
+      title: "View ",
+      render: (record) => {
+        return (
+          <>
+            <Link to={`/`}>
+              <EyeOutlined style={{ color: "blue", fontSize: 18 }} />
+            </Link>
+          </>
+        );
+      },
     },
     {
       key: "4",
+      title: "Edit",
+      render: (record) => {
+        return (
+          <>
+            <EditOutlined
+              onClick={() => {
+                onEditApplication(record);
+              }}
+              style={{ fontSize: 18 }}
+            />
+          </>
+        );
+      },
+    },
+    {
+      key: "5",
       title: "Delete",
-      render: (record) => (
-        <Button
-          type="link"
-          onClick={() => {
-            onDeleteApplication(record);
-          }}
-        >
-          <DeleteOutlined style={{ color: "red", fontSize: 20 }}/>
-        </Button>
-      ),
+      render: (record) => {
+        return (
+          <>
+            <DeleteOutlined
+              onClick={() => {
+                onDeleteApplication(record);
+              }}
+              style={{ color: "red", fontSize: 18 }}
+            />
+          </>
+        );
+      },
     },
   ];
 
   const onDeleteApplication = (record) => {
     Modal.confirm({
-      title: "Are you sure you want to delete this application?",
+      title: "Are you sure, you want to delete this record?",
       okText: "Yes",
       okType: "danger",
       onOk: () => {
-        setDataSource((prev) => {
-          return prev.filter((application) => application.id !== record.id);
+        setDataSource((pre) => {
+          return pre.filter((application) => application.id !== record.id);
         });
       },
     });
   };
-
-  const closeModal = () => {
-    setModalVisible(false);
+  const onEditApplication = (record) => {
+    setIsEditing(true);
+    setEditingApplication({ ...record });
   };
-
-  const tableColumns = [
-    {
-      key: "1",
-      title: "Name",
-      dataIndex: "name",
-    },
-    {
-      key: "2",
-      title: "Approve",
-      render: (record) => (
-        <Button
-        onClick={() => {
-          onApproveStudent(record);
-        }}
-          type="link"
-        >
-          <CheckSquareFilled  style={{ color: "green", fontSize: 35 }}/>
-        </Button>
-      ),
-    },
-    {
-      key: "3",
-      title: "Reject",
-      render: (record) => (
-        <Button
-          type="link"
-          onClick={() => {
-            onRejectStudent(record);
-          }}
-        >
-          <CloseSquareFilled 
-          style={{ color: "red", fontSize: 35 }}
-        />
-        </Button>
-        
-      ),
-    },
-  ];
-
-  const onApproveStudent = (record) => {
-    Modal.confirm({
-      title: "Are you sure you want to approve this student?",
-      okText: "Yes",
-      okType: "primary",
-      onOk: () => {
-        setDataSource2((prev) => {
-          return prev.filter((student) => student.id !== record.id);
-        });
-        const successModal = Modal.success({
-          content: "The student has been approved.",
-          footer: null, // Buton gösterme
-        });
-      
-        setTimeout(() => {
-          successModal.destroy(); // Modal'ı kapat
-        }, 2000); // 2 saniye beklet
-      },
-    });
+  const resetEditing = () => {
+    setIsEditing(false);
+    setEditingApplication(null);
   };
-
-  const onRejectStudent = (record) => {
-    Modal.confirm({
-      title: "Are you sure you want to reject this student?",
-      okText: "Yes",
-      okType: "danger",
-      onOk: () => {
-        setDataSource2((prev) => {
-          return prev.filter((student) => student.id !== record.id);
-        });
-      },
-    });
-  };
-
-  const [tableData, setDataSource2] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-    },
-    {
-      id: 3,
-      name: "İlke Aşağıçayır",
-    },
-    {
-      id: 4,
-      name: "Mehmet Yılmaz",
-    },
-    {
-      id: 5,
-      name: "Ayşe Yılmaz",
-    },
-    {
-      id: 6,
-      name: "Fatma Yılmaz",
-    },
-    // Add more data rows as needed
-  ]);
-
   return (
     <>
       <CompanyNavbar />
-      <div className="px-6 py-6 w-4/5 mx-auto">
+      <div className="px-6 py-6">
         <h1 className="text-4xl font-bold text-center mb-4">
           Internship Applications
         </h1>
-        <Table columns={columns} dataSource={dataSource} />
-
+        <Table
+          className="px-20"
+          columns={columns}
+          dataSource={dataSource}
+        ></Table>
         <Modal
-          title={<div className="text-center">Student Information</div>}
-          visible={modalVisible}
-          onCancel={closeModal}
-          footer={null}
+          title="Edit Application"
+          visible={isEditing}
+          okText="Save"
+          onCancel={() => {
+            resetEditing();
+          }}
+          onOk={() => {
+            setDataSource((pre) => {
+              return pre.map((application) => {
+                if (application.id === editingApplication.id) {
+                  return editingApplication;
+                } else {
+                  return application;
+                }
+              });
+            });
+            resetEditing();
+          }}
         >
-          <Table columns={tableColumns} dataSource={tableData} />
+          <label htmlFor="name">Internship Name</label>
+          <Input className="mb-2"
+            value={editingApplication?.name}
+            onChange={(e) => {
+              setEditingApplication((pre) => {
+                return { ...pre, name: e.target.value };
+              });
+            }}
+          />
+          <label htmlFor="type">Internship Type</label>
+          <Input className="mb-2"
+            value={editingApplication?.type}
+            onChange={(e) => {
+              setEditingApplication((pre) => {
+                return { ...pre, department: e.target.value };
+              });
+            }}
+          />
+          
         </Modal>
       </div>
     </>

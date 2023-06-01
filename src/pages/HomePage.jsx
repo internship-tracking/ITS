@@ -11,7 +11,7 @@ const HomePage = () => {
                 Company Login
               </Button>
             </Link>
-            <Link to={"/company/login"}>
+            <Link to={"/supervisor/login"}>
               <Button type="primary" className="w-full mb-6" size="large">
                 Internship Supervisor Login
               </Button>
@@ -22,7 +22,7 @@ const HomePage = () => {
               </Button>
             </Link>
             <div className="flex justify-center left-0  w-full">
-            Do not you have an account?&nbsp;
+            Don't have an account?&nbsp;
             <Link to="/register" className="text-blue-600">
               Register Now!
             </Link>

@@ -1,33 +1,19 @@
 import React from "react";
 import CompanyNavbar from "../../components/navbar/CompanyNavbar";
-import { Button, Modal, DatePicker, Form, Input, Select } from "antd";
-import { useState } from "react";
-import { MdWarning} from "react-icons/md";
+import { Button,message, DatePicker, Form, Input, Select } from "antd";
 const { RangePicker } = DatePicker;
 
 const NewApplication = () => {
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-  const handleOk = () => {
-    setIsModalOpen(false);
-    const successModal = Modal.success({
-      content: "The application has been created successfully.",
-      footer: null,
-    });
-  
-    setTimeout(() => {
-      successModal.destroy(); // Modal'ı kapat
-    }, 2000); // 2 saniye beklet
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
   const { Option } = Select;
+  
+  const [messageApi, contextHolder] = message.useMessage();
+  const success = () => {
+    messageApi.open({
+      type: 'success',
+      content: 'A new application has been created successfully.',
+      duration: 5,
+    });
+  };
 
   return (
     <>
@@ -106,15 +92,11 @@ const NewApplication = () => {
                   placeholder="Select a option and change input text above"
                   allowClear
                 >
-                  <Option value="positive">
-                    The school provides insurance.
-                  </Option>
+                  <Option value="positive">The school provides insurance.</Option>
                   <Option value="negative">
                     The school does not provide insurance.
                   </Option>
-                  <Option value="notmatter">
-                    Insurance situation does not matter.
-                  </Option>
+                  <Option value="notmatter">Insurance situation does not matter.</Option>
                 </Select>
               </Form.Item>
               {/* Staj yapılacak tarih aralığı */}
@@ -165,32 +147,16 @@ const NewApplication = () => {
               </Form.Item>
               {/* Button */}
               <Form.Item>
+                {contextHolder}
                 <Button
                   type="primary"
+                  onClick={success}
                   htmlType="submit"
                   className="w-full"
                   size="large"
-                  onClick={showModal}
                 >
                   Create a New Application
                 </Button>
-                <Modal
-                  title={
-                    <div className="flex items-center text-2xl ">
-                      <MdWarning className="text-yellow-500 mr-2" />
-                      <span>Warning!</span>
-                    </div>
-                  }
-                  open={isModalOpen}
-                  onOk={handleOk}
-                  onCancel={handleCancel}
-                  closable={false}
-                >
-                  <p>Do you approve it?</p>
-                  <p>
-                    When you create an application, you can not edit it again.
-                  </p>
-                </Modal>
               </Form.Item>
             </Form>
           </div>

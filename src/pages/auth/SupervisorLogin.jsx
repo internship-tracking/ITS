@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Button, Checkbox, Form, Input, message } from "antd";
+import { Button, Checkbox, Form, Input } from "antd";
 import { Link } from "react-router-dom";
 import { login } from '../../redux/authSlice';
 
-const CompanyLogin = () => {
-
+const SupervisorLogin = () => {
+    
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -73,8 +73,8 @@ const CompanyLogin = () => {
             </Form.Item>
           </Form>
           <div className="flex justify-center left-0  w-full">
-            Do not you have an account?&nbsp;
-            <Link to="/company/register" className="text-blue-600">
+            Don't have an account?&nbsp;
+            <Link to="/supervisor/register" className="text-blue-600">
               Register Now!
             </Link>
           </div>
@@ -84,4 +84,4 @@ const CompanyLogin = () => {
   );
 };
 
-export default CompanyLogin;
+export default SupervisorLogin;
