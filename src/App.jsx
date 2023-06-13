@@ -15,6 +15,13 @@ import SupervisorProfile from "./pages/supervisor/SupervisorProfile";
 import Students from "./pages/supervisor/Students";
 import InternshipInfo from "./pages/supervisor/InternshipInfo";
 import InternshipApplications from "./pages/supervisor/Application";
+import StudentRegister from "./pages/auth/StudentRegister";
+import InternshipAnnouncements from "./pages/student/InternshipAnnouncements";
+import StudentInternships from "./pages/student/StudentInternships";
+import StudentApplications from "./pages/student/StudentApplications";
+import StudentPassword from "./pages/student/StudentPassword";
+import StudentProfile from "./pages/student/StudentProfile";
+
 
 
 function App() {
@@ -38,7 +45,12 @@ function App() {
           <Route path="/supervisor/students" element={<Students />} />
           <Route path="/supervisor/internshipinfos" element={<InternshipInfo />} />
           <Route path="/supervisor/applications" element={<InternshipApplications />} />
-
+          <Route path="/student/register" element={<StudentRegister />} />
+          <Route path="/student/password" element={<StudentPassword />} />
+          <Route path="/student/profile" element={<StudentProfile />} />
+          <Route path="/student/announcements" element={<InternshipAnnouncements />} />
+          <Route path="/student/internships" element={<StudentInternships />} />
+          <Route path="/student/applications" element={<StudentApplications />} />
 
         </Routes>
       </BrowserRouter>
