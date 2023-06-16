@@ -6,42 +6,7 @@ import StudentNavbar from "../../components/navbar/StudentNavbar";
 
 const InternshipAnnouncements = () => {
     const studentId = useSelector((state) => state.auth.userId);
-    const [dataSource, setDataSource] = useState([
-        {
-            id: 1,
-            company: {
-                name: "Company A",
-            },
-            sector: "Sector 1",
-            location: "Location 1",
-            contactNumber: "123456789",
-            internshipName: "Internship 1",
-            internshipType: "Type 1",
-            internshipProgram: "Program 1",
-            insuranceSituation: "Situation 1",
-            dateRange1: "2023-01-01",
-            dateRange2: "2023-02-01",
-            departmentNames: "Department 1",
-            studentDepartmentNames: "Student Department 1",
-        },
-        {
-            id: 2,
-            company: {
-                name: "Company B",
-            },
-            sector: "Sector 2",
-            location: "Location 2",
-            contactNumber: "987654321",
-            internshipName: "Internship 2",
-            internshipType: "Type 2",
-            internshipProgram: "Program 2",
-            insuranceSituation: "Situation 2",
-            dateRange1: "2023-03-01",
-            dateRange2: "2023-04-01",
-            departmentNames: "Department 2",
-            studentDepartmentNames: "Student Department 2",
-        },
-    ]);
+    const [dataSource, setDataSource] = useState([]);
 
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
@@ -49,7 +14,7 @@ const InternshipAnnouncements = () => {
     useEffect(() => {
         const fetchAnnouncements = async () => {
             try {
-                const response = await axios.get("/api/announcements");
+                const response = await axios.get("http://localhost:5000/api/internship-announcements");
                 setDataSource(response.data);
             } catch (error) {
                 console.error("Failed to fetch announcements:", error);
@@ -71,23 +36,25 @@ const InternshipAnnouncements = () => {
 
     const handleApply = () => {
         // Logic to submit the application
-        const applicationData = {
-            studentId,
-            announcementId: selectedAnnouncement.id,
-        };
+        if (selectedAnnouncement) {
+            const applicationData = {
+                studentId,
+                announcementId: selectedAnnouncement._id,
+            };
+            console.log(applicationData);
+            // Example axios request:
+            axios.post("http://localhost:5000/api/internship-applications/apply", applicationData)
 
-        // Send the application data to the server using axios or fetch
-        // Example axios request:
-        axios.post("/api/apply", applicationData)
-            .then((response) => {
-                // Handle the success response
-                console.log("Application submitted successfully:", response.data);
-                closeModal();
-            })
-            .catch((error) => {
-                // Handle the error response
-                console.error("Failed to submit application:", error);
-            });
+                .then((response) => {
+                    // Handle the success response
+                    console.log("Application submitted successfully:", response.data);
+                    closeModal();
+                })
+                .catch((error) => {
+                    // Handle the error response
+                    console.error("Failed to submit application:", error);
+                });
+        }
     };
 
     const columns = [
@@ -95,15 +62,61 @@ const InternshipAnnouncements = () => {
             key: "1",
             title: "Company",
             dataIndex: "company",
-            render: (company) => company.name, // Assuming the company object has a "name" property
+            render: (company) => company.companyName,
         },
         {
             key: "2",
             title: "Sector",
-            dataIndex: "sector",
+            dataIndex: "company",
+            render: (company) => company.sector,
         },
-        // Add more columns as needed
-        // Modify the dataIndex to match the corresponding field in the announcement object
+        {
+            key: "3",
+            title: "Location",
+            dataIndex: "company",
+            render: (company) => company.location,
+        },
+        {
+            key: "5",
+            title: "Internship Name",
+            dataIndex: "internshipName",
+        },
+        {
+            key: "6",
+            title: "Internship Type",
+            dataIndex: "internshipType",
+        },
+        {
+            key: "7",
+            title: "Internship Program",
+            dataIndex: "internshipProgram",
+        },
+        {
+            key: "8",
+            title: "Insurance Situation",
+            dataIndex: "insuranceSituation",
+        },
+        {
+            key: "9",
+            title: "Date Range",
+            render: (record) => (
+                <>
+                    <div>{record.dateRange1}</div>
+                    <div>{record.dateRange2}</div>
+                </>
+            ),
+        },
+
+        {
+            key: "10",
+            title: "Department Names",
+            dataIndex: "departmentNames",
+        },
+        {
+            key: "11",
+            title: "Student Department Names",
+            dataIndex: "studentDepartmentNames",
+        },
         {
             key: "apply",
             title: "Action",
@@ -114,6 +127,7 @@ const InternshipAnnouncements = () => {
             ),
         },
     ];
+
 
     return (
         <>

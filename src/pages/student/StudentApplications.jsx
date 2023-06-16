@@ -7,38 +7,27 @@ import StudentNavbar from "../../components/navbar/StudentNavbar";
 
 const StudentApplications = () => {
     const studentId = useSelector((state) => state.auth.userId);
-    const testApplications = [
-        {
-            id: 1,
-            name: "Application 1",
-            department: "Department 1",
-            status: "Pending",
-        },
-        {
-            id: 2,
-            name: "Application 2",
-            department: "Department 2",
-            status: "Approved",
-        },
-        {
-            id: 3,
-            name: "Application 3",
-            department: "Department 3",
-            status: "Rejected",
-        },
-    ];
-    const [dataSource, setDataSource] = useState(testApplications);
+    const [dataSource, setDataSource] = useState();
 
     const deleteApplication = (applicationId) => {
-        setDataSource((prevDataSource) =>
-            prevDataSource.filter((item) => item.id !== applicationId)
-        );
+        // Send the delete request to the backend
+        axios
+            .delete(`http://localhost:5000/api/internship-applications/${applicationId}`)
+            .then((response) => {
+                console.log("Internship Application deleted successfully!");
+                setDataSource((prevDataSource) =>
+                    prevDataSource.filter((item) => item.id !== applicationId)
+                );
+            })
+            .catch((error) => {
+                console.error("Error deleting internship application:", error);
+            });
     };
 
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const response = await axios.get(`/api/applications/${studentId}`);
+                const response = await axios.get(`http://localhost:5000/api/students/${studentId}/applications`);
                 setDataSource(response.data);
             } catch (error) {
                 console.error("Failed to fetch applications:", error);
@@ -47,6 +36,7 @@ const StudentApplications = () => {
 
         fetchApplications();
     }, [studentId]);
+
 
     const columns = [
         {

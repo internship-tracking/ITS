@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Table, Button, Modal, message } from "antd";
+import { CloseSquareFilled } from "@ant-design/icons";
 import SupervisorNavbar from "../../components/navbar/SupervisorNavbar";
-import { Table, Button, Modal, Input } from "antd";
-import { EyeOutlined, CloseSquareFilled } from "@ant-design/icons";
-import { Link } from "react-router-dom";
 
 const Companies = () => {
-  const [dataSource, setDataSource] = useState([]);
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
   const [rejectedRecord, setRejectedRecord] = useState(null);
-  const [rejectReason, setRejectReason] = useState("");
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+  const [dataSource, setDataSource] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("/api/companies");
+        const response = await axios.get("http://localhost:5000/api/companies");
         setDataSource(response.data);
       } catch (error) {
         console.error("Failed to fetch companies:", error);
@@ -24,102 +23,107 @@ const Companies = () => {
     fetchData();
   }, []);
 
+  const deleteCompany = async (companyId) => {
+    try {
+      const response = await axios.delete(`http://localhost:5000/api/companies/${companyId}`);
+      if (response.status === 200) {
+        setDataSource((prev) => prev.filter((company) => company.key !== companyId));
+        message.success("Company deleted successfully.");
+      }
+    } catch (error) {
+      console.error("Error deleting company:", error);
+      message.error("Failed to delete company. Please try again.");
+    }
+  };
+
   const handleReject = (record) => {
     setRejectedRecord(record);
-    setRejectReason(""); // reset the reject reason
     setRejectModalVisible(true);
   };
 
   const handleRejectModalOk = () => {
-    if (rejectReason) {
-      setDataSource((prev) => {
-        return prev.filter((student) => student.id !== rejectedRecord.id);
-      });
-      setRejectModalVisible(false);
-      setRejectReason(""); // reset the reject reason
-      setRejectedRecord(null); // reset the rejected record
-    }
+    setDataSource((prev) => {
+      return prev.filter((company) => company.key !== rejectedRecord.key);
+    });
+    deleteCompany(rejectedRecord.key);
+    setRejectModalVisible(false);
+    setRejectedRecord(null); // reset the rejected record
   };
 
   const handleRejectModalCancel = () => {
     setRejectModalVisible(false);
-    setRejectReason(""); // reset the reject reason
     setRejectedRecord(null); // reset the rejected record
-  };
-
-  const handleRejectReasonChange = (e) => {
-    setRejectReason(e.target.value);
   };
 
   const columns = [
     {
-      key: "1",
       title: "Company Name",
       dataIndex: "name",
     },
     {
-      key: "2",
       title: "Sector",
       dataIndex: "sector",
     },
     {
-      key: "3",
       title: "Location",
       dataIndex: "location",
     },
     {
-      key: "4",
       title: "Contact",
       dataIndex: "contact",
     },
     {
-      key: "5",
-      title: "View",
-      render: (record) => {
-        return (
-          <>
-            <Link to={`/`}>
-              <EyeOutlined style={{ color: "blue", fontSize: 18 }} />
-            </Link>
-          </>
-        );
-      },
-    },
-
-    {
-      key: "6",
       title: "Reject",
       render: (record) => (
         <Button onClick={() => handleReject(record)} type="link">
-          <CloseSquareFilled style={{ color: "red", fontSize: 35 }} />
+          <CloseSquareFilled style={{ color: "red", fontSize: 18 }} />
         </Button>
       ),
     },
   ];
+
+  const expandedRowRender = (record) => {
+    return (
+      <div>
+        <p>Contact Number: {record.contactNumber}</p>
+        <p>Email: {record.email}</p>
+        <p>Work Areas: {record.workAreas.join(", ")}</p>
+      </div>
+    );
+  };
 
   return (
     <>
       <SupervisorNavbar />
       <div className="px-6 py-6">
         <h1 className="text-4xl font-bold text-center mb-4">Companies</h1>
-        <Table className="px-20" columns={columns} dataSource={dataSource} />
+        <Table
+          className="px-20"
+          columns={columns}
+          dataSource={dataSource}
+          expandable={{
+            expandedRowRender,
+            expandRowByClick: true,
+            expandedRowKeys,
+            onExpand: (expanded, record) => {
+              if (expanded) {
+                setExpandedRowKeys([record.key]);
+              } else {
+                setExpandedRowKeys([]);
+              }
+            },
+          }}
+        />
       </div>
 
       <Modal
-        title="Reject Reason"
+        title="Confirm Company Rejection"
         visible={rejectModalVisible}
         onOk={handleRejectModalOk}
         onCancel={handleRejectModalCancel}
         bodyStyle={{ paddingTop: 0 }} // adjust the top padding of the modal body
       >
-        <Input.TextArea
-          placeholder="Enter the reason for rejection"
-          value={rejectReason}
-          onChange={handleRejectReasonChange}
-          autoSize={{ minRows: 4, maxRows: 6 }} // adjust the number of rows displayed
-          style={{ resize: "none", paddingTop: 8, paddingLeft: 8 }} // adjust the padding and resize behavior
-          autoFocus // automatically focus on the input field when the modal opens
-        />
+        <p>Are you sure you want to reject this company?</p>
       </Modal>
     </>
   );

@@ -21,7 +21,7 @@ const CompanyLogin = () => {
 
     dispatch(login(email, password)).then(() => {
       //  navigate to ...
-      navigate('/');
+      navigate('/company/');
     });
   };
 

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { login } from '../../redux/authSlice';
 
 const SupervisorLogin = () => {
-    
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ const SupervisorLogin = () => {
 
     dispatch(login(email, password)).then(() => {
       //  navigate to ...
-      navigate('/');
+      navigate('/supervisor');
     });
   };
 

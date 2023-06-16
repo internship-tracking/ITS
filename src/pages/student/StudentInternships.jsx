@@ -4,39 +4,12 @@ import axios from "axios";
 import { Table, Button, Space, Upload, message, Popconfirm } from "antd";
 import { DownloadOutlined, DeleteOutlined, UploadOutlined } from "@ant-design/icons";
 import StudentNavbar from "../../components/navbar/StudentNavbar";
+import { saveAs } from "file-saver";
 
 
 const StudentInternships = () => {
     const studentId = useSelector((state) => state.auth.userId);
-    const testInternships = [
-        {
-            id: 1,
-            company: {
-                companyName: "ABC Company",
-                sector: "Technology",
-                location: "New York",
-            },
-            startDate: "2023-01-01",
-            endDate: "2023-02-28",
-            internshipBook: "https://example.com/internship-book-1.pdf",
-        },
-        {
-            id: 2,
-            company: {
-                companyName: "XYZ Company",
-                sector: "Finance",
-                location: "London",
-            },
-            startDate: "2023-03-01",
-            endDate: "2023-04-30",
-            internshipBook: "", // Empty internship book field
-        },
-        // Add more test data as needed
-    ];
-
-    const [dataSource, setDataSource] = useState(testInternships);
-
-    // Rest of the code...
+    const [dataSource, setDataSource] = useState();
 
     const columns = [
         {
@@ -93,7 +66,7 @@ const StudentInternships = () => {
                             </Popconfirm>
                         </>
                     ) : (
-                        <Upload beforeUpload={uploadInternshipBook}>
+                        <Upload beforeUpload={(file) => uploadInternshipBook(record.id, file)}>
                             <Button icon={<UploadOutlined />}>Upload</Button>
                         </Upload>
                     )}
@@ -102,38 +75,92 @@ const StudentInternships = () => {
         },
     ];
 
-    const downloadInternshipBook = (internshipBookUrl) => {
-        // Implement the logic to download the internship book
-        // You can use a library like file-saver to trigger the download
+    const downloadInternshipBook = (internshipId) => {
+        // Make a request to download the internship book
+        axios({
+            url: `http://localhost:5000/api/internships/${internshipId}/internshipbook`,
+            method: "GET",
+            responseType: "blob",
+        })
+            .then((response) => {
+                const filename = getFilenameFromResponse(response);
+
+                // Trigger the download using file-saver
+                const blob = new Blob([response.data], { type: "application/pdf" });
+                saveAs(blob, filename);
+            })
+            .catch((error) => {
+                console.error("Error downloading internship book:", error);
+                message.error("Failed to download internship book");
+            });
     };
 
-    const uploadInternshipBook = (file) => {
-        // Implement the logic to upload the internship book
-        // You can make a request to the backend to handle the file upload
-        // Once the upload is successful, update the dataSource with the new internship book URL
-        // Display a success message to the user
-        message.success("Internship book uploaded successfully.");
-        return false; // Prevent default upload behavior
+    const getFilenameFromResponse = (response) => {
+        const contentDispositionHeader = response.headers["content-disposition"];
+        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        const matches = filenameRegex.exec(contentDispositionHeader);
+        if (matches != null && matches[1]) {
+            return matches[1].replace(/['"]/g, "");
+        }
+        return "internship-book.pdf";
     };
+
+    const uploadInternshipBook = async (internshipId, file) => {
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await axios.post(
+                `http://localhost:5000/api/internships/${internshipId}/internshipbook`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                message.success("Internship book uploaded successfully");
+                // Perform any additional actions after successful upload
+            }
+        } catch (error) {
+            console.error("Error uploading internship book:", error);
+            message.error("Failed to upload internship book");
+        }
+    };
+
 
     const deleteInternshipBook = (internshipId) => {
-        // Implement the logic to delete the internship book
-        // You can make a request to the backend to delete the internship book based on the internshipId
-        // Once the deletion is successful, update the dataSource by removing the internship book URL
-        // Display a success message to the user
-        message.success("Internship book deleted successfully.");
+        // Make a request to the backend to delete the internship book based on the internshipId
+        axios
+            .delete(`http://localhost:5000/api/internships/${internshipId}/internshipbook`)
+            .then(() => {
+                // Update the dataSource by removing the internship book URL
+                setDataSource((prevDataSource) => {
+                    const updatedDataSource = prevDataSource.map((item) => {
+                        if (item.id === internshipId) {
+                            return { ...item, internshipBook: "" };
+                        }
+                        return item;
+                    });
+                    return updatedDataSource;
+                });
+                // Display a success message to the user
+                message.success("Internship book deleted successfully.");
+            })
+            .catch((error) => {
+                console.error("Failed to delete internship book:", error);
+                // Display an error message to the user
+                message.error("Failed to delete internship book. Please try again.");
+            });
     };
 
-    const openInternshipDetails = (internshipId) => {
-        // Implement the logic to open the internship details modal
-        // You can use Modal component from 'antd' and make a request to the backend to get the internship details based on the internshipId
-        // Show the details in the modal
-    };
 
     useEffect(() => {
         const fetchInternships = async () => {
             try {
-                const response = await axios.get(`/api/internships/${studentId}`);
+                const response = await axios.get(`http://localhost:5000/api/internships/${studentId}`);
                 setDataSource(response.data);
             } catch (error) {
                 console.error("Failed to fetch internships:", error);

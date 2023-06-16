@@ -1,23 +1,23 @@
 import { Button, Checkbox, Form, Input } from "antd";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const CompanyRegister = () => {
   const onFinish = async (values) => {
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
-        method: 'POST',
+      const response = await axios.post('http://localhost:5000/api/companies', values, {
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(values)
+        }
       });
 
-      const data = await response.json();
+      const data = response.data;
       console.log(data); // you can do something with the response data
     } catch (error) {
       console.error(error);
     }
   };
+
 
   return (
     <div className="h-screen overflow-auto">

@@ -7,7 +7,13 @@ const { Option } = Select;
 const StudentRegister = () => {
     const onFinish = async (values) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/register', values);
+            console.log(values);
+            const response = await axios.post('http://localhost:5000/api/students', values, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
             const data = response.data;
             console.log(data); // you can do something with the response data
         } catch (error) {
@@ -141,7 +147,7 @@ const StudentRegister = () => {
                         {/* Department */}
                         <Form.Item
                             label="Department"
-                            name="department"
+                            name="departmentName"
                             rules={[
                                 {
                                     required: true,
@@ -156,13 +162,7 @@ const StudentRegister = () => {
                                 {/* Add more Option elements for each department */}
                             </Select>
                         </Form.Item>
-                        {/* Remember me */}
-                        <Form.Item name="remember" valuePropName="checked">
-                            <div className="flex justify-between items-center">
-                                <Checkbox>Remember me</Checkbox>
-                                <Link>Forgot Password?</Link>
-                            </div>
-                        </Form.Item>
+
                         <Form.Item>
                             <Button
                                 type="primary"

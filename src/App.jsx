@@ -21,8 +21,11 @@ import StudentInternships from "./pages/student/StudentInternships";
 import StudentApplications from "./pages/student/StudentApplications";
 import StudentPassword from "./pages/student/StudentPassword";
 import StudentProfile from "./pages/student/StudentProfile";
-
-
+import CompanyProfile from "./pages/company/CompanyProfile";
+import CompanyPassword from "./pages/company/CompanyPassword";
+import ApprovedApplication from "./pages/company/ApprovedApplication";
+import StudentLogin from "./pages/auth/StudentLogin";
+import Student from "./pages/student/Student"
 
 function App() {
   return (
@@ -34,8 +37,11 @@ function App() {
           <Route path="/company/register" element={<CompanyRegister />} />
           <Route path="/company/login" element={<CompanyLogin />} />
           <Route path="/company" element={<Company />} />
+          <Route path="/company/profile" element={<CompanyProfile />} />
           <Route path="/company/new" element={<NewApplication />} />
           <Route path="/company/application" element={<Application />} />
+          <Route path="/company/password" element={<CompanyPassword />} />
+          <Route path="/company/approved" element={<ApprovedApplication />} />
           <Route path="/supervisor/register" element={<SupervisorRegister />} />
           <Route path="/supervisor/login" element={<SupervisorLogin />} />
           <Route path="/supervisor" element={<Supervisor />} />
@@ -46,11 +52,13 @@ function App() {
           <Route path="/supervisor/internshipinfos" element={<InternshipInfo />} />
           <Route path="/supervisor/applications" element={<InternshipApplications />} />
           <Route path="/student/register" element={<StudentRegister />} />
+          <Route path="/student/login" element={<StudentLogin />} />
           <Route path="/student/password" element={<StudentPassword />} />
           <Route path="/student/profile" element={<StudentProfile />} />
           <Route path="/student/announcements" element={<InternshipAnnouncements />} />
           <Route path="/student/internships" element={<StudentInternships />} />
           <Route path="/student/applications" element={<StudentApplications />} />
+          <Route path="/student" element={<Student />} />
 
         </Routes>
       </BrowserRouter>

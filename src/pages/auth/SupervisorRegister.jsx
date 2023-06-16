@@ -1,34 +1,33 @@
 import { Button, Checkbox, Form, Input } from "antd";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const SupervisorRegister = () => {
-    const onFinish = async (values) => {
-        try {
-          const response = await fetch('http://localhost:5000/api/register', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(values)
-          });
-    
-          const data = await response.json();
-          console.log(data); // you can do something with the response data
-        } catch (error) {
-          console.error(error);
+  const onFinish = async (values) => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/supervisors/register', values, {
+        headers: {
+          'Content-Type': 'application/json'
         }
-      };
-    
+      });
+
+      const data = response.data;
+      console.log(data); // you can do something with the response data
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-        <div className="h-screen overflow-auto">
+    <div className="h-screen overflow-auto">
       <div className="flex justify-center vh-100">
         <div className="xl:px-20 px-10 py-10 w-1/2 flex flex-col h-full justify-center relative">
-        <h1 className="text-center text-5xl font-bold mb-2 ">REGISTER</h1>
-          <Form layout="vertical">
+          <h1 className="text-center text-5xl font-bold mb-2 ">REGISTER</h1>
+          <Form layout="vertical" onFinish={onFinish}>
             {/* Akademisyenin Adı */}
             <Form.Item
               label="Name"
-              name={"supervisorname"}
+              name={"name"}
               rules={[
                 {
                   required: true,
@@ -40,8 +39,8 @@ const SupervisorRegister = () => {
             </Form.Item>
             {/* Soyisim */}
             <Form.Item label="Surname"
-            name={"surname"}
-            rules={[
+              name={"surname"}
+              rules={[
                 {
                   required: true,
                   message: "Surname must be required!",

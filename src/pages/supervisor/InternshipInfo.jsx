@@ -4,7 +4,7 @@ import axios from "axios";
 import SupervisorNavbar from "../../components/navbar/SupervisorNavbar";
 import { Table, Modal, Button, Space, Radio, Input, message } from "antd";
 import { FileTextTwoTone, DownloadOutlined, CheckCircleFilled, CloseCircleFilled, CloseSquareFilled, CheckSquareFilled } from "@ant-design/icons";
-
+import { saveAs } from "file-saver";
 
 const InternshipInfo = () => {
   const supervisorId = useSelector((state) => state.auth.userId);
@@ -14,18 +14,16 @@ const InternshipInfo = () => {
   const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInternships = async () => {
       try {
-        const response = await axios.post("/api/internship-info", {
-          supervisorId,
-        });
+        const response = await axios.get(`http://localhost:5000/api/supervisors/${supervisorId}/internships`);
         setDataSource(response.data);
       } catch (error) {
-        console.error("Failed to fetch internship info:", error);
+        console.error("Failed to fetch internships:", error);
       }
     };
 
-    fetchData();
+    fetchInternships();
   }, [supervisorId]);
 
   const columns = [
@@ -43,7 +41,7 @@ const InternshipInfo = () => {
           <Radio.Group value={size} onChange={(e) => setSize(e.target.value)}>
           </Radio.Group>
           <Space direction="vertical">
-            <Button type="primary" icon={<DownloadOutlined />} size={size}>
+            <Button type="primary" icon={<DownloadOutlined />} size={size} onClick={() => downloadInternshipBook(record.internshipBook)}>
               Download
             </Button>
           </Space>
@@ -86,20 +84,24 @@ const InternshipInfo = () => {
     },
     {
       key: "4",
-      title: "Upload of Evaluation Form",
-
+      title: "Download Evaluation Form",
       render: (record) => (
         <>
-          <Radio.Group value={size} onChange={(e) => setSize(e.target.value)}>
-          </Radio.Group>
+          <Radio.Group value={size} onChange={(e) => setSize(e.target.value)}></Radio.Group>
           <Space direction="vertical">
-            <Button type="primary" icon={<DownloadOutlined />} size={size}>
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              size={size}
+              onClick={() => downloadEvaluationForm(record.evaluationForm)}
+            >
               Download
             </Button>
           </Space>
         </>
       ),
     },
+
     {
       key: "5",
       title: "Approve",
@@ -134,21 +136,26 @@ const InternshipInfo = () => {
   ];
   const onApproveStudent = (record) => {
     Modal.confirm({
-      title: "Are you sure you want to approve this internship.",
+      title: "Are you sure you want to approve this internship?",
       okText: "Yes",
       okType: "primary",
-      onOk: () => {
-        setDataSource((prev) => {
-          return prev.filter((internship) => internship.id !== record.id);
-        });
-        const successModal = Modal.success({
-          content: "The internship has been approved.",
-          footer: null, // Buton gösterme
-        });
+      onOk: async () => {
+        try {
+          await axios.patch(`http://localhost:5000/api/internships/${record.id}`, { status: "Approved" });
+          setDataSource((prev) => {
+            return prev.filter((internship) => internship.id !== record.id);
+          });
 
-        setTimeout(() => {
-          successModal.destroy(); // Modal'ı kapat
-        }, 2000); // 2 saniye beklet
+          const successModal = Modal.success({
+            content: "The internship has been approved.",
+            footer: null, // Hide the button
+          });
+          setTimeout(() => {
+            successModal.destroy();
+          }, 2000);
+        } catch (error) {
+          throw new Error("Failed to approve internship: " + error.message);
+        }
       },
     });
   };
@@ -158,13 +165,20 @@ const InternshipInfo = () => {
       title: "Are you sure you want to reject this internship?",
       okText: "Yes",
       okType: "danger",
-      onOk: () => {
-        setDataSource((prev) => {
-          return prev.filter((internship) => internship.id !== record.id);
-        });
+      onOk: async () => {
+        try {
+          await axios.patch(`http://localhost:5000/api/internships/${record.id}`, { status: "Rejected" });
+          setDataSource((prev) => {
+            return prev.filter((internship) => internship.id !== record.id);
+          });
+        } catch (error) {
+          throw new Error("Failed to reject internship: " + error.message);
+        }
       },
     });
   };
+
+
 
   const closeModal = () => {
     setModalVisible(false);
@@ -181,40 +195,102 @@ const InternshipInfo = () => {
       }
       return item;
     });
+
     setDataSource(updatedDataSource);
     setModalVisible(false);
     setRejectionReason("");
+
+    // Send API request to update the internship book status to "APPROVED"
+    axios.put(`http://localhost:5000/api/internships/${id}`, { internshipBookStatus: "APPROVED" })
+      .then((response) => {
+        // Handle success response if needed
+        console.log(response.data.message);
+      })
+      .catch((error) => {
+        // Handle error if needed
+        console.error("Failed to update internship book status:", error);
+      });
   };
 
   const handleReject = (id) => {
-
+    if (rejectionReason.trim() === "") {
+      message.warning("Please provide feedback for the rejection.");
+      return;
+    }
     const updatedDataSource = dataSource.map((item) => {
-      if (rejectionReason.trim() === "") {
-        const errorModal = Modal.error({
-          content: "Please provide a feedback for the rejection.",
-          footer: null, // Buton gösterme
-        });
-
-        setTimeout(() => {
-          errorModal.destroy(); // Modal'ı kapat
-        }, 2000); // 2 saniye beklet
-        //message.error("Please provide a feedback for the rejection.");
-        //return item;
-      }
-      else if (item.id === id) {
+      if (item.id === id) {
         return {
           ...item,
           status: "REJECTED",
         };
-
       }
       return item;
     });
+
     setDataSource(updatedDataSource);
     setModalVisible(false);
     setRejectionReason("");
+
+    // Send API request to update the internship book status to "REJECTED"
+    axios.put(`http://localhost:5000/api/internships/${id}`, { internshipBookStatus: "REJECTED" })
+      .then((response) => {
+        // Handle success response if needed
+        console.log(response.data.message);
+      })
+      .catch((error) => {
+        // Handle error if needed
+        console.error("Failed to update internship book status:", error);
+      });
   };
 
+  const downloadInternshipBook = (internshipId) => {
+    // Make a request to download the internship book
+    axios({
+      url: `http://localhost:5000/api/internships/${internshipId}/internshipbook`,
+      method: "GET",
+      responseType: "blob",
+    })
+      .then((response) => {
+        const filename = getFilenameFromResponse(response);
+
+        // Trigger the download using file-saver
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        saveAs(blob, filename);
+      })
+      .catch((error) => {
+        console.error("Error downloading internship book:", error);
+        message.error("Failed to download internship book");
+      });
+  };
+
+  const getFilenameFromResponse = (response) => {
+    const contentDispositionHeader = response.headers["content-disposition"];
+    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+    const matches = filenameRegex.exec(contentDispositionHeader);
+    if (matches != null && matches[1]) {
+      return matches[1].replace(/['"]/g, "");
+    }
+    return "internship-book.pdf";
+  };
+  const downloadEvaluationForm = (internshipId) => {
+    // Make a request to download the internship book
+    axios({
+      url: `http://localhost:5000/api/internships/${internshipId}/evaluation`,
+      method: "GET",
+      responseType: "blob",
+    })
+      .then((response) => {
+        const filename = getFilenameFromResponse(response);
+
+        // Trigger the download using file-saver
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        saveAs(blob, filename);
+      })
+      .catch((error) => {
+        console.error("Error downloading internship book:", error);
+        message.error("Failed to download internship book");
+      });
+  };
 
 
   return (

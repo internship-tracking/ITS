@@ -26,25 +26,25 @@ const SupervisorNavbar = () => {
       <div className="fixed flex items-center text-white font-bold text-3xl border-gray-400 top-0 left-0 w-full h-14 bg-[#1b3365]">
         &nbsp; &nbsp; ITS
         <div className="flex items-center absolute top-4 right-10 space-x-2 cursor-pointer">
-        <Link to="/supervisor/profile">
+          <Link to="/supervisor/profile">
             <BiUserCircle size={30} color="white" />
           </Link>
           <Link to="/supervisor/password">
-          <RiLockPasswordLine size={30} color="white" />
+            <RiLockPasswordLine size={30} color="white" />
           </Link>
           <div
-          onMouseEnter={() => setIsLogoutHovered(true)}
-          onMouseLeave={() => setIsLogoutHovered(false)}
-        >
-          <IoMdLogOut
-            size={30}
-            color={isLogoutHovered ? "red" : "white"}
-            onClick={handleLogout}
-            style={{
-              transition: "color 0.3s ease-in-out",
-            }}
-          />
-        </div>
+            onMouseEnter={() => setIsLogoutHovered(true)}
+            onMouseLeave={() => setIsLogoutHovered(false)}
+          >
+            <IoMdLogOut
+              size={30}
+              color={isLogoutHovered ? "red" : "white"}
+              onClick={handleLogout}
+              style={{
+                transition: "color 0.3s ease-in-out",
+              }}
+            />
+          </div>
         </div>
       </div>
       <div className="fixed top-16 left-3" onClick={() => setMenu(!Menu)}>
@@ -85,6 +85,14 @@ const SupervisorNavbar = () => {
               to={"/supervisor/internshipinfos"}
             >
               Internship Informations
+            </NavLink>
+          </li>
+          <li className="">
+            <NavLink
+              className="inline-block ml-5  text-xl border-white hover:text-[#9ad2ff]  transition-all ease-in-out"
+              to={"/supervisor/applications"}
+            >
+              Internship Applications
             </NavLink>
           </li>
         </ul>

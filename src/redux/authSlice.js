@@ -2,9 +2,9 @@ import { createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const initialState = {
-  token: null,
-  userType: null,
-  userId: null,
+  token: localStorage.getItem('token'),
+  userType: localStorage.getItem('userType'),
+  userId: localStorage.getItem('userId'),
   isLoading: false,
   error: null
 };
@@ -23,20 +23,22 @@ const authSlice = createSlice({
       state.userType = action.payload.userType;
       state.userId = action.payload.userId;
       state.error = null;
+      localStorage.setItem('userType', action.payload.userType);
     },
     loginFailure(state, action) {
       state.isLoading = false;
       state.error = action.payload.error.message || action.payload.error;
     },
-
     logout(state) {
       state.token = null;
       state.userType = null;
       state.userId = null;
       state.isLoading = false;
       state.error = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('userType');
+      localStorage.removeItem('userId');
     }
-
   }
 });
 
@@ -49,11 +51,11 @@ export const login = (email, password) => async dispatch => {
       email,
       password
     });
-    const { token, userId,userType } = response.data;
-    console.log(response.data)
+    const { token, userId, userType } = response.data;
     dispatch(loginSuccess({ token, userType, userId }));
     localStorage.setItem('token', token);
-    localStorage.setItem('userId', userId); 
+    localStorage.setItem('userType', userType);
+    localStorage.setItem('userId', userId);
   } catch (error) {
     dispatch(loginFailure({ error: error.message }));
   }

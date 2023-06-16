@@ -1,19 +1,57 @@
 import React from "react";
 import CompanyNavbar from "../../components/navbar/CompanyNavbar";
-import { Button,message, DatePicker, Form, Input, Select } from "antd";
+import { Button, Modal, DatePicker, Form, Input, Select } from "antd";
+import { useState } from "react";
+import { MdWarning } from "react-icons/md";
+import axios from "axios";
+import { useSelector } from "react-redux";
 const { RangePicker } = DatePicker;
 
+
 const NewApplication = () => {
-  const { Option } = Select;
-  
-  const [messageApi, contextHolder] = message.useMessage();
-  const success = () => {
-    messageApi.open({
-      type: 'success',
-      content: 'A new application has been created successfully.',
-      duration: 5,
-    });
+  const companyId = localStorage.getItem('userId');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const showModal = () => {
+    setIsModalOpen(true);
   };
+  const handleOk = () => {
+    setIsModalOpen(false);
+    const successModal = Modal.success({
+      content: "The application has been created successfully.",
+      footer: null,
+    });
+
+    setTimeout(() => {
+      successModal.destroy(); // Modal'ı kapat
+    }, 1000); // 2 saniye beklet
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const { Option } = Select;
+
+  const onFinish = (values) => {
+
+    axios
+      .post(`http://localhost:5000/api/companies/${companyId}/internship-announcements`, values)
+      .then((response) => {
+        setIsModalOpen(false);
+        Modal.success({
+          content: "The announcement has been created successfully.",
+          footer: null,
+        });
+      })
+      .catch((error) => {
+        console.error("Error creating announcement:", error);
+        Modal.error({
+          title: "Error",
+          content: "An error occurred while creating the announcement.",
+        });
+      });
+  };
+
 
   return (
     <>
@@ -24,7 +62,7 @@ const NewApplication = () => {
             <h1 className="text-center text-3xl font-bold mb-2 ">
               Requested Information
             </h1>
-            <Form layout="vertical">
+            <Form layout="vertical" onFinish={onFinish}>
               {/* Staj Adı */}
               <Form.Item
                 label="Internship Name"
@@ -92,11 +130,15 @@ const NewApplication = () => {
                   placeholder="Select a option and change input text above"
                   allowClear
                 >
-                  <Option value="positive">The school provides insurance.</Option>
+                  <Option value="positive">
+                    The school provides insurance.
+                  </Option>
                   <Option value="negative">
                     The school does not provide insurance.
                   </Option>
-                  <Option value="notmatter">Insurance situation does not matter.</Option>
+                  <Option value="notmatter">
+                    Insurance situation does not matter.
+                  </Option>
                 </Select>
               </Form.Item>
               {/* Staj yapılacak tarih aralığı */}
@@ -147,16 +189,32 @@ const NewApplication = () => {
               </Form.Item>
               {/* Button */}
               <Form.Item>
-                {contextHolder}
                 <Button
                   type="primary"
-                  onClick={success}
                   htmlType="submit"
                   className="w-full"
                   size="large"
+                  onClick={showModal}
                 >
                   Create a New Application
                 </Button>
+                <Modal
+                  title={
+                    <div className="flex items-center text-2xl ">
+                      <MdWarning className="text-yellow-500 mr-2" />
+                      <span>Warning!</span>
+                    </div>
+                  }
+                  open={isModalOpen}
+                  onOk={handleOk}
+                  onCancel={handleCancel}
+                  closable={false}
+                >
+                  <p>Do you approve it?</p>
+                  <p>
+                    When you create an application, you can not edit it again.
+                  </p>
+                </Modal>
               </Form.Item>
             </Form>
           </div>

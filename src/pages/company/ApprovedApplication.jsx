@@ -1,46 +1,19 @@
 import CompanyNavbar from "../../components/navbar/CompanyNavbar";
-import { Table, Modal, Button, Space, Upload } from "antd";
-import { useState } from "react";
+import { Table, Modal, Button, Space, Upload, message } from "antd";
+import { useEffect, useState } from "react";
 import {
   FileTextTwoTone,
   UploadOutlined,
   CheckCircleFilled,
   CloseCircleFilled,
 } from "@ant-design/icons";
+import axios from "axios";
+import { useSelector } from "react-redux";
+
 
 const ApprovedApplication = () => {
-  const [dataSource, setDataSource] = useState([
-    {
-      id: 1,
-      name: "İlke Aşağıçayır",
-      date: "01.01.2021 - 01.02.2021",
-      status: "",
-    },
-    {
-      id: 2,
-      name: "Ozan Berk",
-      date: "01.01.2021 - 01.02.2021",
-      status: "",
-    },
-    {
-      id: 3,
-      name: "Melda İrem",
-      date: "01.01.2021 - 01.02.2021",
-      status: "",
-    },
-    {
-      id: 4,
-      name: "Elif Nur",
-      date: "01.01.2021 - 01.02.2021",
-      status: "",
-    },
-    {
-      id: 5,
-      name: "Erkan Kayım",
-      date: "01.01.2021 - 01.02.2021",
-      status: "",
-    },
-  ]);
+  const companyId = useSelector((state) => state.auth.userId);
+  const [dataSource, setDataSource] = useState([]);
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -101,9 +74,10 @@ const ApprovedApplication = () => {
           size="large"
         >
           <Upload
-            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+            action={`http://localhost:5000/api/internships/${record.id}/evaluation`}
             listType="evaluation-form"
             maxCount={1}
+            beforeUpload={validateFile}
           >
             <Button icon={<UploadOutlined />}>Upload (Max: 1)</Button>
           </Upload>
@@ -112,37 +86,82 @@ const ApprovedApplication = () => {
     },
   ];
 
+  const validateFile = (file) => {
+    const isPdf = file.type === "application/pdf";
+    const fileSizeLimit = 10; // Size limit in MB
+
+    if (!isPdf) {
+      message.error("Only PDF files are allowed!");
+      return Upload.LIST_IGNORE;
+    }
+
+    if (file.size / 1024 / 1024 > fileSizeLimit) {
+      message.error(`File size must be less than ${fileSizeLimit}MB!`);
+      return Upload.LIST_IGNORE;
+    }
+
+    return true;
+  };
+
   const closeModal = () => {
     setModalVisible(false);
   };
 
-  const handleApprove = (id) => {
+  const handleApprove = async (id) => {
     const updatedDataSource = dataSource.map((item) => {
       if (item.id === id) {
         return {
           ...item,
-          status: "APPROVED",
+          status: 'APPROVED',
         };
       }
       return item;
     });
     setDataSource(updatedDataSource);
     setModalVisible(false);
+
+    try {
+      // Send updated status to the backend
+      await axios.put(`http://localhost:5000/api/internships/${id}`, { newStatus: 'APPROVED' });
+      console.log('Status updated successfully!');
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
-  const handleReject = (id) => {
+  const handleReject = async (id) => {
     const updatedDataSource = dataSource.map((item) => {
       if (item.id === id) {
         return {
           ...item,
-          status: "REJECTED",
+          status: 'REJECTED',
         };
       }
       return item;
     });
     setDataSource(updatedDataSource);
     setModalVisible(false);
+
+    try {
+      // Send updated status to the backend
+      await axios.put(`http://localhost:5000/api/internships/${id}`, { newStatus: 'REJECTED' });
+      console.log('Status updated successfully!');
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
+
+
+  useEffect(() => {
+    axios.get(`http://localhost:5000/api/companies/${companyId}/internships`)
+      .then((response) => {
+        setDataSource(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching internships:", error);
+      });
+  }, []);
+
 
   return (
     <>

@@ -1,21 +1,34 @@
 import { Button, Form, Input } from "antd";
 import StudentNavbar from "../../components/navbar/StudentNavbar";
 import { Link } from "react-router-dom";
-
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 const StudentPassword = () => {
-    const onFinish = async (values) => {
-        try {
-            const response = await fetch("http://localhost:5000/api/", {
-                method: "",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(values),
-            });
+    const studentId = useSelector((state) => state.auth.userId);
 
-            const data = await response.json();
-            console.log(data); // you can do something with the response data
+    const onFinish = async (values) => {
+        const { newPassword, confirmPassword } = values;
+
+        if (newPassword !== confirmPassword) {
+            // Display an error message or perform any other desired action
+            console.log("Passwords do not match");
+            return;
+        }
+
+        try {
+            const response = await axios.patch(
+                `http://localhost:5000/api/students/${studentId}/change-password`,
+                { password: newPassword },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            const data = response.data;
+            console.log(data); // You can do something with the response data
         } catch (error) {
             console.error(error);
         }
@@ -31,12 +44,12 @@ const StudentPassword = () => {
                         <Form layout="vertical" onFinish={onFinish}>
                             {/* Password */}
                             <Form.Item
-                                label="Password"
-                                name={"password"}
+                                label="Current Password"
+                                name="currentPassword"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Password must be required!",
+                                        message: "Current password is required!",
                                     },
                                     {
                                         min: 6,
@@ -46,19 +59,43 @@ const StudentPassword = () => {
                             >
                                 <Input.Password />
                             </Form.Item>
-                            {/* Password */}
+                            {/* New Password */}
                             <Form.Item
                                 label="New Password"
-                                name={"password"}
+                                name="newPassword"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Password must be required!",
+                                        message: "New password is required!",
                                     },
                                     {
                                         min: 6,
                                         message: "Password must be at least 6 characters!",
                                     },
+                                ]}
+                            >
+                                <Input.Password />
+                            </Form.Item>
+                            {/* Confirm Password */}
+                            <Form.Item
+                                label="Confirm Password"
+                                name="confirmPassword"
+                                dependencies={["newPassword"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please confirm your new password!",
+                                    },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || getFieldValue("newPassword") === value) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(
+                                                new Error("Passwords do not match!")
+                                            );
+                                        },
+                                    }),
                                 ]}
                             >
                                 <Input.Password />
@@ -85,7 +122,6 @@ const StudentPassword = () => {
                 </div>
             </div>
         </>
-
     );
 };
 

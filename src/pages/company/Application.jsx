@@ -1,167 +1,284 @@
 import CompanyNavbar from "../../components/navbar/CompanyNavbar";
-import { Table, Modal, Input } from "antd";
-import { useState } from "react";
-import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Table, Modal, Button, Tooltip } from "antd";
+import { useEffect, useState } from "react";
+import { DeleteOutlined, EyeOutlined, CheckSquareFilled, CloseSquareFilled } from "@ant-design/icons";
+import axios from "axios";
+import { useSelector } from "react-redux";
+
 
 const Application = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingApplication, setEditingApplication] = useState(null);
+  const companyId = localStorage.getItem('userId');
+  const [announcementId, setAnnouncementId] = useState(null);
+  const [tooltipData, setTooltipData] = useState([]);
   const [dataSource, setDataSource] = useState([
-    {
-      id: 1,
-      name: "Software",
-      number: 99,
-      type: "Compulsory",
-    },
-    {
-      id: 2,
-      name: "Hardware",
-      number: 99,
-      type: "Compulsory",
-    },
-    {
-      id: 3,
-      name: "DevOps",
-      number: 99,
-      type: "Compulsory",
-    },
-    {
-      id: 4,
-      name: "Data Science",
-      number: 99,
-      type: "Compulsory",
-    },
+
   ]);
+
+  const [tableData, setTableData] = useState([]);
+
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const renderTooltipContent = (record) => {
+    const student = tableData.find((item) => item.id === record.id);
+    if (student) {
+      return (
+        <div>
+          <p>Name: {student.name}</p>
+          <p>Surname: {student.surname}</p>
+          <p>Class Year: {student.classYear}</p>
+          <p>GPA: {student.gpa}</p>
+          <p>Email: {student.email}</p>
+          <p>Phone: {student.phone}</p>
+          <p>Address: {student.address}</p>
+          {/* Add more student information fields as needed */}
+        </div>
+      );
+    }
+    return null;
+  };
+
   const columns = [
     {
       key: "1",
-      title: "Name",
-      dataIndex: "name",
+      title: "Full Name",
+      dataIndex: "internshipName",
     },
     {
       key: "2",
       title: "Number of Applications",
-      dataIndex: "number",
+      render: (record) => <span>{record.applications.length}</span>,
     },
     {
       key: "3",
-      title: "View ",
-      render: (record) => {
-        return (
-          <>
-            <Link to={`/`}>
-              <EyeOutlined style={{ color: "blue", fontSize: 18 }} />
-            </Link>
-          </>
-        );
-      },
+      title: "View",
+      render: (record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            setAnnouncementId(record.id);
+            setModalVisible(true);
+          }}
+        >
+          <EyeOutlined style={{ color: "blue", fontSize: 20 }} />
+        </Button>
+      ),
     },
     {
       key: "4",
-      title: "Edit",
-      render: (record) => {
-        return (
-          <>
-            <EditOutlined
-              onClick={() => {
-                onEditApplication(record);
-              }}
-              style={{ fontSize: 18 }}
-            />
-          </>
-        );
-      },
-    },
-    {
-      key: "5",
       title: "Delete",
-      render: (record) => {
-        return (
-          <>
-            <DeleteOutlined
-              onClick={() => {
-                onDeleteApplication(record);
-              }}
-              style={{ color: "red", fontSize: 18 }}
-            />
-          </>
-        );
-      },
+      render: (record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            onDeleteAnnouncement(record);
+          }}
+        >
+          <DeleteOutlined style={{ color: "red", fontSize: 20 }} />
+        </Button>
+      ),
     },
   ];
 
-  const onDeleteApplication = (record) => {
+  useEffect(() => {
+    const fetchData = () => {
+      axios
+        .get(`http://localhost:5000/api/internship-announcements/${companyId}`)
+        .then((response) => {
+          setDataSource(response.data);
+          console.log(response.data)
+        })
+        .catch((error) => {
+          console.error("Error fetching internship announcements:", error);
+        });
+    };
+
+    fetchData(); // Initial data fetch
+
+    const interval = setInterval(fetchData, 10000); // Refresh every 10 seconds
+
+    return () => {
+      clearInterval(interval); // Cleanup interval on component unmount
+    };
+  }, []);
+
+
+
+  // Fetch internship applications data for a specific announcement
+  useEffect(() => {
+    if (announcementId) {
+      console.log(announcementId);
+      axios
+        .get(`http://localhost:5000/api/internship-announcements/${announcementId}/applications`)
+        .then((response) => {
+          const applications = response.data;
+          setTableData(
+            applications.map((application) => {
+              const {
+                _id: applicationId,
+                student: { name, surname },
+              } = application;
+              return {
+                applicationId,
+                studentName: name,
+                studentSurname: surname,
+              };
+            })
+          );
+          setTooltipData(
+            applications.map((application) => {
+              const { student, ...rest } = application;
+              return { student, ...rest };
+            })
+          );
+        })
+        .catch((error) => {
+          console.error("Error fetching applications:", error);
+        });
+    }
+  }, [announcementId]);
+
+
+
+
+  const onDeleteAnnouncement = (record) => {
     Modal.confirm({
-      title: "Are you sure, you want to delete this record?",
+      title: "Are you sure you want to delete this announcement?",
       okText: "Yes",
       okType: "danger",
       onOk: () => {
-        setDataSource((pre) => {
-          return pre.filter((application) => application.id !== record.id);
-        });
+        // Delete the application from the backend
+        axios
+          .delete(`http://localhost:5000/api/internship-announcements/${record.id}`)
+          .then((response) => {
+            console.log("Announcement deleted successfully!");
+            setDataSource((prev) =>
+              prev.filter((announcement) => announcement.id !== record.id)
+            );
+          })
+          .catch((error) => {
+            console.error("Error deleting announcement:", error);
+          });
       },
     });
   };
-  const onEditApplication = (record) => {
-    setIsEditing(true);
-    setEditingApplication({ ...record });
+
+  const closeModal = () => {
+    setModalVisible(false);
   };
-  const resetEditing = () => {
-    setIsEditing(false);
-    setEditingApplication(null);
+
+  const tableColumns = [
+    {
+      key: "1",
+      title: "Name",
+      dataIndex: "name",
+      render: (text, record) => (
+        <Tooltip title={renderTooltipContent(record)}>
+          <span>{text}</span>
+        </Tooltip>
+      ),
+    },
+    {
+      key: "2",
+      title: "Approve",
+      render: (record) => (
+        <Button
+          onClick={() => {
+            onApproveApplication(record);
+          }}
+          type="link"
+        >
+          <CheckSquareFilled style={{ color: "green", fontSize: 35 }} />
+        </Button>
+      ),
+    },
+    {
+      key: "3",
+      title: "Reject",
+      render: (record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            onRejectApplication(record);
+          }}
+        >
+          <CloseSquareFilled style={{ color: "red", fontSize: 35 }} />
+        </Button>
+      ),
+    },
+  ];
+
+  const onApproveApplication = (record) => {
+    Modal.confirm({
+      title: "Are you sure you want to approve this application?",
+      okText: "Yes",
+      okType: "primary",
+      onOk: () => {
+        // Send the approval request to the backend with updated status
+        axios
+          .patch(`http://localhost:5000/api/internship-applications/${record.id}`, { status: "Waiting for supervisor approval" }) // Include the updated status in the request body
+          .then((response) => {
+            console.log("Application approved successfully!");
+            setTableData((prev) =>
+              prev.filter((application) => application.id !== record.id)
+            );
+            const successModal = Modal.success({
+              content: "The application has been approved.",
+              footer: null, // Hide the button
+            });
+
+            setTimeout(() => {
+              successModal.destroy(); // Close the modal
+            }, 2000); // Wait for 2 seconds
+          })
+          .catch((error) => {
+            console.error("Error approving application:", error);
+          });
+      },
+    });
   };
+
+
+  const onRejectApplication = (record) => {
+    Modal.confirm({
+      title: "Are you sure you want to reject this application?",
+      okText: "Yes",
+      okType: "danger",
+      onOk: () => {
+        // Send the rejection request to the backend
+        axios
+          .patch(`http://localhost:5000/api/internship-applications/${record.id}`, { status: "Rejected" })
+          .then((response) => {
+            console.log("Application rejected successfully!");
+            setTableData((prev) =>
+              prev.filter((application) => application.id !== record.id)
+            );
+          })
+          .catch((error) => {
+            console.error("Error rejecting application:", error);
+          });
+      },
+    });
+  };
+
+
+
   return (
     <>
       <CompanyNavbar />
-      <div className="px-6 py-6">
+      <div className="px-6 py-6 w-4/5 mx-auto">
         <h1 className="text-4xl font-bold text-center mb-4">
           Internship Applications
         </h1>
-        <Table
-          className="px-20"
-          columns={columns}
-          dataSource={dataSource}
-        ></Table>
+        <Table columns={columns} dataSource={dataSource} />
+
         <Modal
-          title="Edit Application"
-          visible={isEditing}
-          okText="Save"
-          onCancel={() => {
-            resetEditing();
-          }}
-          onOk={() => {
-            setDataSource((pre) => {
-              return pre.map((application) => {
-                if (application.id === editingApplication.id) {
-                  return editingApplication;
-                } else {
-                  return application;
-                }
-              });
-            });
-            resetEditing();
-          }}
+          title={<div className="text-center">Student Information</div>}
+          visible={modalVisible}
+          onCancel={closeModal}
+          footer={null}
         >
-          <label htmlFor="name">Internship Name</label>
-          <Input className="mb-2"
-            value={editingApplication?.name}
-            onChange={(e) => {
-              setEditingApplication((pre) => {
-                return { ...pre, name: e.target.value };
-              });
-            }}
-          />
-          <label htmlFor="type">Internship Type</label>
-          <Input className="mb-2"
-            value={editingApplication?.type}
-            onChange={(e) => {
-              setEditingApplication((pre) => {
-                return { ...pre, department: e.target.value };
-              });
-            }}
-          />
-          
+          <Table columns={tableColumns} dataSource={tableData} />
         </Modal>
       </div>
     </>
@@ -169,3 +286,4 @@ const Application = () => {
 };
 
 export default Application;
+
