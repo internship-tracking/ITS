@@ -36,7 +36,7 @@ const CompanyNavbar = () => {
               className="inline-block ml-5  text-xl border-white flex-col hover:text-[#9ad2ff]  transition-all ease-in-out"
               to={"/company/new"}
             >
-              New Internship Applications
+              Create an announcement
             </NavLink>
           </li>
           <li className="">
@@ -44,15 +44,17 @@ const CompanyNavbar = () => {
               className="inline-block ml-5  text-xl border-white hover:text-[#9ad2ff]  transition-all ease-in-out"
               to={"/company/application"}
             >
-              Internship Applications
+              Announcements
             </NavLink>
           </li>
-          {/* <li className="">
-            <NavLink className="inline-block ml-5  text-xl border-b-2 border-white hover:text-green-700 transition-all ease-in-out" to={"/Interview"}>Interviews</NavLink>
-          </li>
           <li className="">
-            <NavLink className="inline-block ml-5  text-xl border-b-2 border-white hover:text-green-700 transition-all ease-in-out"to={"/Tickets"}>Tickets</NavLink>
-          </li>               */}
+            <NavLink
+              className="inline-block ml-5  text-xl border-white hover:text-[#9ad2ff]  transition-all ease-in-out"
+              to={"/company/approved"}
+            >
+              Internships
+            </NavLink>
+          </li>
         </ul>
       </div>
     </div>
