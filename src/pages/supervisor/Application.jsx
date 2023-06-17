@@ -7,6 +7,7 @@ import {
     CheckCircleFilled,
     CloseCircleFilled,
 } from "@ant-design/icons";
+import moment from "moment";
 
 const InternshipApplications = () => {
     const supervisorId = useSelector((state) => state.auth.userId);
@@ -17,30 +18,35 @@ const InternshipApplications = () => {
 
     const fetchApplications = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/supervisors/${supervisorId}/pending-applications`);
+            const response = await axios.get(
+                `http://localhost:5000/api/supervisors/${supervisorId}/pending-applications`
+            );
 
-            // Map the response data and include the announcement data
             const updatedDataSource = response.data.map((application) => {
                 return {
                     key: application.id,
                     id: application.id,
-                    name: application.student.name,
-                    date: application.date,
+                    name: application.name,
+                    surname: application.surname,
+                    gpa: application.gpa,
+                    classYear: application.classYear,
+                    departmentName: application.departmentName,
+                    email: application.email,
+                    phone: application.phone,
+                    address: application.address,
                     status: application.status,
-                    department: application.student.departmentName,
-                    company: application.announcement.company,
-                    sector: application.announcement.sector,
-                    location: application.announcement.location,
-                    contactNumber: application.announcement.contactNumber,
-                    internshipName: application.announcement.internshipName,
-                    internshipType: application.announcement.internshipType,
-                    internshipProgram: application.announcement.internshipProgram,
-                    insuranceSituation: application.announcement.insuranceSituation,
-                    dateRange1: application.announcement.dateRange1,
-                    dateRange2: application.announcement.dateRange2,
-                    departmentNames: application.announcement.departmentNames,
-                    studentDepartmentNames: application.announcement.studentDepartmentNames,
-                    announcement: application.announcement,
+                    companyName: application.companyName,
+                    sector: application.sector,
+                    location: application.location,
+                    contactNumber: application.contactNumber,
+                    internshipName: application.internshipName,
+                    internshipType: application.internshipType,
+                    internshipProgram: application.internshipProgram,
+                    insuranceSituation: application.insuranceSituation,
+                    dateRange1: application.dateRange1,
+                    dateRange2: application.dateRange2,
+                    departmentNames: application.departmentNames,
+                    studentDepartmentNames: application.studentDepartmentNames,
                 };
             });
 
@@ -52,7 +58,8 @@ const InternshipApplications = () => {
 
     useEffect(() => {
         fetchApplications();
-    }, []);
+    }, [supervisorId]);
+
 
 
 
@@ -70,7 +77,7 @@ const InternshipApplications = () => {
 
         // Send request to update the application status to "Approved"
         axios
-            .patch(`http://localhost:5000/api/applications/${record.id}`, {
+            .patch(`http://localhost:5000/api/internship-applications/${record.id}`, {
                 status: "Approved",
             })
             .then((response) => {
@@ -88,6 +95,7 @@ const InternshipApplications = () => {
                     });
             })
             .catch((error) => {
+                console.log(record.id);
                 console.error("Failed to approve application:", error);
                 message.error("Failed to approve application. Please try again.");
             });
@@ -178,9 +186,9 @@ const InternshipApplications = () => {
                     dataSource={dataSource}
                     columns={columns}
                     expandable={{
-                        expandedRowRender: record => (
+                        expandedRowRender: (record) => (
                             <div style={{ margin: 0 }}>
-                                <p>Company: {record.company}</p>
+                                <p>Company: {record.companyName}</p>
                                 <p>Sector: {record.sector}</p>
                                 <p>Location: {record.location}</p>
                                 <p>Contact Number: {record.contactNumber}</p>
@@ -188,7 +196,7 @@ const InternshipApplications = () => {
                                 <p>Internship Type: {record.internshipType}</p>
                                 <p>Internship Program: {record.internshipProgram}</p>
                                 <p>Insurance Situation: {record.insuranceSituation}</p>
-                                <p>Date Range: {record.dateRange1} - {record.dateRange2}</p>
+                                <p>Date Range: {moment(record.dateRange1).format('YYYY-MM-DD')} - {moment(record.dateRange2).format('YYYY-MM-DD')}</p>
                                 <p>Department Names: {record.departmentNames}</p>
                                 <p>Student Department Names: {record.studentDepartmentNames}</p>
                             </div>
@@ -197,11 +205,11 @@ const InternshipApplications = () => {
                     }}
                     onRow={(record, rowIndex) => {
                         return {
-                            onClick: event => {
+                            onClick: (event) => {
                                 // You must call this to expand row when you customize onRow.
-                                if (event.target.tagName === 'TD') {
+                                if (event.target.tagName === "TD") {
                                     // this line will trigger expand only when you click on a cell (`TD`), not on a button in the Action column
-                                    this.refs.table.toggleExpand(rowIndex)
+                                    this.refs.table.toggleExpand(rowIndex);
                                 }
                             },
                         };

@@ -13,11 +13,12 @@ const Students = () => {
   const fetchStudents = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/supervisors/${supervisorId}/students`);
-      setDataSource(response.data);
+      setDataSource(response.data.map((student, index) => ({ ...student, key: index })));
     } catch (error) {
       console.error("Failed to fetch students:", error);
     }
   };
+
 
   useEffect(() => {
     fetchStudents();
@@ -65,7 +66,7 @@ const Students = () => {
       okText: "Yes",
       okType: "danger",
       onOk: () => {
-        deleteStudent(record.key);
+        deleteStudent(record._id);
       },
     });
   };

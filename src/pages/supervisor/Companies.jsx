@@ -14,7 +14,7 @@ const Companies = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/companies");
-        setDataSource(response.data);
+        setDataSource(response.data.map((company, index) => ({ ...company, key: index })));
       } catch (error) {
         console.error("Failed to fetch companies:", error);
       }
@@ -45,7 +45,7 @@ const Companies = () => {
     setDataSource((prev) => {
       return prev.filter((company) => company.key !== rejectedRecord.key);
     });
-    deleteCompany(rejectedRecord.key);
+    deleteCompany(rejectedRecord._id);
     setRejectModalVisible(false);
     setRejectedRecord(null); // reset the rejected record
   };

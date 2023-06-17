@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { Table, Button, Modal } from "antd";
 import StudentNavbar from "../../components/navbar/StudentNavbar";
+import moment from "moment";
 
 const InternshipAnnouncements = () => {
     const studentId = useSelector((state) => state.auth.userId);
@@ -62,20 +63,21 @@ const InternshipAnnouncements = () => {
             key: "1",
             title: "Company",
             dataIndex: "company",
-            render: (company) => company.companyName,
+            render: (company) => company ? company.companyName : "",
         },
         {
             key: "2",
             title: "Sector",
             dataIndex: "company",
-            render: (company) => company.sector,
+            render: (company) => company ? company.sector : "",
         },
         {
             key: "3",
             title: "Location",
             dataIndex: "company",
-            render: (company) => company.location,
+            render: (company) => company ? company.location : "",
         },
+
         {
             key: "5",
             title: "Internship Name",
@@ -100,10 +102,9 @@ const InternshipAnnouncements = () => {
             key: "9",
             title: "Date Range",
             render: (record) => (
-                <>
-                    <div>{record.dateRange1}</div>
-                    <div>{record.dateRange2}</div>
-                </>
+                <div style={{ whiteSpace: "nowrap" }}>
+                    {moment(record.dateRange1).format("YYYY-MM-DD")} - {moment(record.dateRange2).format("YYYY-MM-DD")}
+                </div>
             ),
         },
 

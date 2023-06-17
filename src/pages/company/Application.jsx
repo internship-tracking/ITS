@@ -20,23 +20,23 @@ const Application = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const renderTooltipContent = (record) => {
-    const student = tableData.find((item) => item.id === record.id);
+    const student = tooltipData.find((item) => item.id === record.id);
+    console.log(student);
     if (student) {
       return (
         <div>
-          <p>Name: {student.name}</p>
-          <p>Surname: {student.surname}</p>
-          <p>Class Year: {student.classYear}</p>
-          <p>GPA: {student.gpa}</p>
-          <p>Email: {student.email}</p>
-          <p>Phone: {student.phone}</p>
-          <p>Address: {student.address}</p>
-          {/* Add more student information fields as needed */}
+          {Object.entries(student).map(([key, value]) => (
+            <p key={key}>
+              {key}: {value}
+            </p>
+          ))}
         </div>
       );
     }
     return null;
   };
+
+
 
   const columns = [
     {
@@ -56,7 +56,7 @@ const Application = () => {
         <Button
           type="link"
           onClick={() => {
-            setAnnouncementId(record.id);
+            setAnnouncementId(record.key);
             setModalVisible(true);
           }}
         >
@@ -85,14 +85,16 @@ const Application = () => {
       axios
         .get(`http://localhost:5000/api/internship-announcements/${companyId}`)
         .then((response) => {
-          setDataSource(response.data);
-          console.log(response.data)
+          const announcements = response.data.map((announcement) => ({
+            ...announcement,
+            key: announcement._id, // Assign a unique key to each announcement
+          }));
+          setDataSource(announcements);
         })
         .catch((error) => {
           console.error("Error fetching internship announcements:", error);
         });
     };
-
     fetchData(); // Initial data fetch
 
     const interval = setInterval(fetchData, 10000); // Refresh every 10 seconds
@@ -104,6 +106,8 @@ const Application = () => {
 
 
 
+
+
   // Fetch internship applications data for a specific announcement
   useEffect(() => {
     if (announcementId) {
@@ -112,24 +116,43 @@ const Application = () => {
         .get(`http://localhost:5000/api/internship-announcements/${announcementId}/applications`)
         .then((response) => {
           const applications = response.data;
+          console.log(response.data);
           setTableData(
-            applications.map((application) => {
-              const {
-                _id: applicationId,
-                student: { name, surname },
-              } = application;
-              return {
-                applicationId,
-                studentName: name,
-                studentSurname: surname,
-              };
-            })
+            applications.map((application) => ({
+              key: application._id,
+              name: application.student.name,
+              surname: application.student.surname,
+              approve: (
+                <Button
+                  onClick={() => {
+                    onApproveApplication(application);
+                  }}
+                  type="link"
+                >
+                  <CheckSquareFilled style={{ color: "green", fontSize: 35 }} />
+                </Button>
+              ),
+              reject: (
+                <Button
+                  type="link"
+                  onClick={() => {
+                    onRejectApplication(application);
+                  }}
+                >
+                  <CloseSquareFilled style={{ color: "red", fontSize: 35 }} />
+                </Button>
+              ),
+            }))
           );
           setTooltipData(
-            applications.map((application) => {
-              const { student, ...rest } = application;
-              return { student, ...rest };
-            })
+            applications.map((application) => ({
+              gpa: application.student.gpa,
+              classYear: application.student.classYear,
+              departmentName: application.student.departmentName,
+              email: application.student.email,
+              phone: application.student.phone,
+              address: application.student.address,
+            }))
           );
         })
         .catch((error) => {
@@ -169,23 +192,22 @@ const Application = () => {
 
   const tableColumns = [
     {
-      key: "1",
+      key: "name",
       title: "Name",
       dataIndex: "name",
       render: (text, record) => (
         <Tooltip title={renderTooltipContent(record)}>
-          <span>{text}</span>
+          <span>{`${record.name} ${record.surname}`}</span>
         </Tooltip>
       ),
     },
     {
-      key: "2",
+      key: "approve",
       title: "Approve",
-      render: (record) => (
+      dataIndex: "approve",
+      render: (text, record) => (
         <Button
-          onClick={() => {
-            onApproveApplication(record);
-          }}
+          onClick={() => onApproveApplication(record)}
           type="link"
         >
           <CheckSquareFilled style={{ color: "green", fontSize: 35 }} />
@@ -193,20 +215,22 @@ const Application = () => {
       ),
     },
     {
-      key: "3",
+      key: "reject",
       title: "Reject",
-      render: (record) => (
+      dataIndex: "reject",
+      render: (text, record) => (
         <Button
+          onClick={() => onRejectApplication(record)}
           type="link"
-          onClick={() => {
-            onRejectApplication(record);
-          }}
         >
           <CloseSquareFilled style={{ color: "red", fontSize: 35 }} />
         </Button>
       ),
     },
   ];
+
+
+
 
   const onApproveApplication = (record) => {
     Modal.confirm({
@@ -216,11 +240,11 @@ const Application = () => {
       onOk: () => {
         // Send the approval request to the backend with updated status
         axios
-          .patch(`http://localhost:5000/api/internship-applications/${record.id}`, { status: "Waiting for supervisor approval" }) // Include the updated status in the request body
+          .patch(`http://localhost:5000/api/internship-applications/${record.key}`, { status: "Waiting for supervisor approval" }) // Include the updated status in the request body
           .then((response) => {
             console.log("Application approved successfully!");
             setTableData((prev) =>
-              prev.filter((application) => application.id !== record.id)
+              prev.filter((application) => application.key !== record.key)
             );
             const successModal = Modal.success({
               content: "The application has been approved.",
@@ -232,6 +256,7 @@ const Application = () => {
             }, 2000); // Wait for 2 seconds
           })
           .catch((error) => {
+            console.log(record.key)
             console.error("Error approving application:", error);
           });
       },
@@ -247,11 +272,11 @@ const Application = () => {
       onOk: () => {
         // Send the rejection request to the backend
         axios
-          .patch(`http://localhost:5000/api/internship-applications/${record.id}`, { status: "Rejected" })
+          .patch(`http://localhost:5000/api/internship-applications/${record.key}`, { status: "Rejected" })
           .then((response) => {
             console.log("Application rejected successfully!");
             setTableData((prev) =>
-              prev.filter((application) => application.id !== record.id)
+              prev.filter((application) => application.key !== record.key)
             );
           })
           .catch((error) => {

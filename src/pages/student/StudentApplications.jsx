@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { Table, Button, Popconfirm } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
+import moment from "moment";
 import StudentNavbar from "../../components/navbar/StudentNavbar";
 
 const StudentApplications = () => {
@@ -10,19 +11,23 @@ const StudentApplications = () => {
     const [dataSource, setDataSource] = useState();
 
     const deleteApplication = (applicationId) => {
+        console.log(applicationId);
+        // Filter out the deleted application from the current dataSource state
+        const updatedDataSource = dataSource.filter((item) => item._id !== applicationId);
+
         // Send the delete request to the backend
         axios
             .delete(`http://localhost:5000/api/internship-applications/${applicationId}`)
             .then((response) => {
                 console.log("Internship Application deleted successfully!");
-                setDataSource((prevDataSource) =>
-                    prevDataSource.filter((item) => item.id !== applicationId)
-                );
+                // Update the dataSource state with the filtered data
+                setDataSource(updatedDataSource);
             })
             .catch((error) => {
                 console.error("Error deleting internship application:", error);
             });
     };
+
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -37,17 +42,16 @@ const StudentApplications = () => {
         fetchApplications();
     }, [studentId]);
 
-
     const columns = [
         {
             key: "1",
-            title: "Name",
-            dataIndex: "name",
+            title: "Company Name",
+            dataIndex: ["announcement", "company", "companyName"],
         },
         {
             key: "2",
-            title: "Department",
-            dataIndex: "department",
+            title: "Internship Name",
+            dataIndex: ["announcement", "internshipName"],
         },
         {
             key: "3",
@@ -60,7 +64,7 @@ const StudentApplications = () => {
             render: (record) => (
                 <Popconfirm
                     title="Are you sure you want to delete this application?"
-                    onConfirm={() => deleteApplication(record.id)}
+                    onConfirm={() => deleteApplication(record._id)} // Use record._id as the application ID
                     okText="Yes"
                     cancelText="No"
                 >
@@ -69,6 +73,12 @@ const StudentApplications = () => {
                     </Button>
                 </Popconfirm>
             ),
+        },
+        {
+            key: "5",
+            title: "Created Date",
+            dataIndex: "createdAt",
+            render: (date) => moment(date).format("YYYY-MM-DD"), // Format the date using moment.js
         },
     ];
 

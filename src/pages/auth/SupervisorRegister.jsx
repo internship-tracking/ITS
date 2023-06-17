@@ -1,10 +1,13 @@
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input, Select } from "antd";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
+
+const { Option } = Select;
 const SupervisorRegister = () => {
   const onFinish = async (values) => {
     try {
+      console.log(values);
       const response = await axios.post('http://localhost:5000/api/supervisors/register', values, {
         headers: {
           'Content-Type': 'application/json'
@@ -61,6 +64,22 @@ const SupervisorRegister = () => {
               ]}
             >
               <Input />
+            </Form.Item>
+            <Form.Item
+              label="Department"
+              name="departmentName"
+              rules={[
+                {
+                  required: true,
+                  message: "Department is required!",
+                },
+              ]}
+            >
+              <Select>
+                <Option value="department1">Department 1</Option>
+                <Option value="department2">Department 2</Option>
+              </Select>
+
             </Form.Item>
             {/* Password */}
             <Form.Item

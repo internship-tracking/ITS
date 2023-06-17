@@ -8,7 +8,7 @@ const SupervisorPassword = () => {
   const supervisorId = useSelector((state) => state.auth.userId);
 
   const onFinish = async (values) => {
-    const { newPassword, confirmPassword } = values;
+    const { currentPassword, newPassword, confirmPassword } = values;
 
     if (newPassword !== confirmPassword) {
       // Display an error message or perform any other desired action
@@ -19,7 +19,10 @@ const SupervisorPassword = () => {
     try {
       const response = await axios.patch(
         `http://localhost:5000/api/supervisors/${supervisorId}/change-password`,
-        { password: newPassword },
+        {
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        },
         {
           headers: {
             "Content-Type": "application/json",
@@ -33,6 +36,7 @@ const SupervisorPassword = () => {
       console.error(error);
     }
   };
+
 
   return (
     <>

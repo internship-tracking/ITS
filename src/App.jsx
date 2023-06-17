@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CompanyRegister from "./pages/auth/CompanyRegister";
 import CompanyLogin from "./pages/auth/CompanyLogin";
 import HomePage from "./pages/HomePage";
@@ -26,8 +26,12 @@ import CompanyPassword from "./pages/company/CompanyPassword";
 import ApprovedApplication from "./pages/company/ApprovedApplication";
 import StudentLogin from "./pages/auth/StudentLogin";
 import Student from "./pages/student/Student"
+import { useSelector } from "react-redux";
+import PrivateRoute from "./pages/auth/PrivateRoute";
+
 
 function App() {
+  const userType = useSelector(state => state.auth.userType);
   return (
     <>
       <BrowserRouter>
@@ -36,29 +40,36 @@ function App() {
           <Route path="/register" element={<HomePage2 />} />
           <Route path="/company/register" element={<CompanyRegister />} />
           <Route path="/company/login" element={<CompanyLogin />} />
-          <Route path="/company" element={<Company />} />
-          <Route path="/company/profile" element={<CompanyProfile />} />
-          <Route path="/company/new" element={<NewApplication />} />
-          <Route path="/company/application" element={<Application />} />
-          <Route path="/company/password" element={<CompanyPassword />} />
-          <Route path="/company/approved" element={<ApprovedApplication />} />
           <Route path="/supervisor/register" element={<SupervisorRegister />} />
           <Route path="/supervisor/login" element={<SupervisorLogin />} />
-          <Route path="/supervisor" element={<Supervisor />} />
-          <Route path="/supervisor/companies" element={<Companies />} />
-          <Route path="/supervisor/password" element={<SupervisorPassword />} />
-          <Route path="/supervisor/profile" element={<SupervisorProfile />} />
-          <Route path="/supervisor/students" element={<Students />} />
-          <Route path="/supervisor/internshipinfos" element={<InternshipInfo />} />
-          <Route path="/supervisor/applications" element={<InternshipApplications />} />
           <Route path="/student/register" element={<StudentRegister />} />
           <Route path="/student/login" element={<StudentLogin />} />
-          <Route path="/student/password" element={<StudentPassword />} />
-          <Route path="/student/profile" element={<StudentProfile />} />
-          <Route path="/student/announcements" element={<InternshipAnnouncements />} />
-          <Route path="/student/internships" element={<StudentInternships />} />
-          <Route path="/student/applications" element={<StudentApplications />} />
-          <Route path="/student" element={<Student />} />
+
+          <Route path="/company" element={<PrivateRoute allowedUserTypes={['Company']}><Company /></PrivateRoute>} />
+          <Route path="/company/profile" element={<PrivateRoute allowedUserTypes={['Company']}><CompanyProfile /></PrivateRoute>} />
+          <Route path="/company/new" element={<PrivateRoute allowedUserTypes={['Company']}><NewApplication /></PrivateRoute>} />
+          <Route path="/company/application" element={<PrivateRoute allowedUserTypes={['Company']}><Application /></PrivateRoute>} />
+          <Route path="/company/password" element={<PrivateRoute allowedUserTypes={['Company']}><CompanyPassword /></PrivateRoute>} />
+          <Route path="/company/approved" element={<PrivateRoute allowedUserTypes={['Company']}><ApprovedApplication /></PrivateRoute>} />
+
+          <Route path="/supervisor" element={<PrivateRoute allowedUserTypes={['Supervisor']}><Supervisor /></PrivateRoute>} />
+          <Route path="/supervisor/companies" element={<PrivateRoute allowedUserTypes={['Supervisor']}><Companies /></PrivateRoute>} />
+          <Route path="/supervisor/password" element={<PrivateRoute allowedUserTypes={['Supervisor']}><SupervisorPassword /></PrivateRoute>} />
+          <Route path="/supervisor/profile" element={<PrivateRoute allowedUserTypes={['Supervisor']}><SupervisorProfile /></PrivateRoute>} />
+          <Route path="/supervisor/students" element={<PrivateRoute allowedUserTypes={['Supervisor']}><Students /></PrivateRoute>} />
+          <Route path="/supervisor/internshipinfos" element={<PrivateRoute allowedUserTypes={['Supervisor']}><InternshipInfo /></PrivateRoute>} />
+          <Route path="/supervisor/applications" element={<PrivateRoute allowedUserTypes={['Supervisor']}><InternshipApplications /></PrivateRoute>} />
+
+          <Route path="/student/password" element={<PrivateRoute allowedUserTypes={'Student'}><StudentPassword /></PrivateRoute>} />
+          <Route path="/student/profile" element={<PrivateRoute allowedUserTypes={'Student'}><StudentProfile /></PrivateRoute>} />
+          <Route path="/student/internships" element={<PrivateRoute allowedUserTypes={'Student'}><StudentInternships /></PrivateRoute>} />
+          <Route path="/student/applications" element={<PrivateRoute allowedUserTypes={'Student'}><StudentApplications /></PrivateRoute>} />
+          <Route path="/student" element={<PrivateRoute allowedUserTypes={'Student'}><Student /></PrivateRoute>} />
+          <Route
+            path="/student/announcements"
+            element={<PrivateRoute allowedUserTypes={'Student'} ><InternshipAnnouncements /></PrivateRoute>}
+          />
+
 
         </Routes>
       </BrowserRouter>

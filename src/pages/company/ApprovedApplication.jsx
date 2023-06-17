@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
-
+import moment from "moment";
 
 const ApprovedApplication = () => {
   const companyId = useSelector((state) => state.auth.userId);
@@ -17,17 +17,24 @@ const ApprovedApplication = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
 
+
   const columns = [
     {
       key: "1",
       title: "Full Name",
-      dataIndex: "name",
+      render: (record) => `${record.student.name} ${record.student.surname}`,
     },
     {
       key: "2",
       title: "Dates of Internship",
-      dataIndex: "date",
+      render: (record) => (
+        <>
+          {moment(record.startDate).format("YYYY-MM-DD")} -{" "}
+          {moment(record.endDate).format("YYYY-MM-DD")}
+        </>
+      ),
     },
+    
     {
       key: "3",
       title: "Approve of Internship Book",
@@ -73,18 +80,26 @@ const ApprovedApplication = () => {
           }}
           size="large"
         >
-          <Upload
-            action={`http://localhost:5000/api/internships/${record.id}/evaluation`}
-            listType="evaluation-form"
-            maxCount={1}
-            beforeUpload={validateFile}
-          >
-            <Button icon={<UploadOutlined />}>Upload (Max: 1)</Button>
-          </Upload>
+          {record.internshipBook && (
+            <a href={record.internshipBook} download>
+              Download Internship Book
+            </a>
+          )}
+          {record.status !== "APPROVED" && (
+            <Upload
+              action={`http://localhost:5000/api/internships/${record._id}/evaluation`}
+              listType="evaluation-form"
+              maxCount={1}
+              beforeUpload={validateFile}
+            >
+              <Button icon={<UploadOutlined />}>Upload (Max: 1)</Button>
+            </Upload>
+          )}
         </Space>
       ),
     },
   ];
+
 
   const validateFile = (file) => {
     const isPdf = file.type === "application/pdf";

@@ -51,6 +51,7 @@ export const login = (email, password) => async dispatch => {
       email,
       password
     });
+    console.log(response);
     const { token, userId, userType } = response.data;
     dispatch(loginSuccess({ token, userType, userId }));
     localStorage.setItem('token', token);

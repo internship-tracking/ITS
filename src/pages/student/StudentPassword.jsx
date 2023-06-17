@@ -1,14 +1,16 @@
+import React, { useState } from "react";
 import { Button, Form, Input } from "antd";
-import StudentNavbar from "../../components/navbar/StudentNavbar";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import StudentNavbar from "../../components/navbar/StudentNavbar";
 
 const StudentPassword = () => {
     const studentId = useSelector((state) => state.auth.userId);
+    const [form] = Form.useForm();
 
     const onFinish = async (values) => {
-        const { newPassword, confirmPassword } = values;
+        const { currentPassword, newPassword, confirmPassword } = values;
 
         if (newPassword !== confirmPassword) {
             // Display an error message or perform any other desired action
@@ -19,7 +21,10 @@ const StudentPassword = () => {
         try {
             const response = await axios.patch(
                 `http://localhost:5000/api/students/${studentId}/change-password`,
-                { password: newPassword },
+                {
+                    currentPassword,
+                    newPassword,
+                },
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -29,6 +34,9 @@ const StudentPassword = () => {
 
             const data = response.data;
             console.log(data); // You can do something with the response data
+
+            // Reset the form fields after successful password change
+            form.resetFields();
         } catch (error) {
             console.error(error);
         }
@@ -37,12 +45,12 @@ const StudentPassword = () => {
     return (
         <>
             <StudentNavbar />
-            <div className="h-screen overflow-auto ">
+            <div className="h-screen overflow-auto">
                 <div className="flex justify-center items-center vh-100">
                     <div className="xl:px-20 px-10 py-10 w-1/2 flex flex-col h-full justify-center relative">
                         <h1 className="text-center text-5xl font-bold my-10">CHANGE PASSWORD</h1>
-                        <Form layout="vertical" onFinish={onFinish}>
-                            {/* Password */}
+                        <Form form={form} layout="vertical" onFinish={onFinish}>
+                            {/* Current Password */}
                             <Form.Item
                                 label="Current Password"
                                 name="currentPassword"
@@ -91,9 +99,7 @@ const StudentPassword = () => {
                                             if (!value || getFieldValue("newPassword") === value) {
                                                 return Promise.resolve();
                                             }
-                                            return Promise.reject(
-                                                new Error("Passwords do not match!")
-                                            );
+                                            return Promise.reject(new Error("Passwords do not match!"));
                                         },
                                     }),
                                 ]}
@@ -102,12 +108,7 @@ const StudentPassword = () => {
                             </Form.Item>
                             <Form.Item>
                                 <div className="flex justify-end">
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                        className="mr-2"
-                                        size="large"
-                                    >
+                                    <Button type="primary" htmlType="submit" className="mr-2" size="large">
                                         Update
                                     </Button>
                                     <Link to="/student">

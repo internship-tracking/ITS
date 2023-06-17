@@ -5,6 +5,7 @@ import SupervisorNavbar from "../../components/navbar/SupervisorNavbar";
 import { Table, Modal, Button, Space, Radio, Input, message } from "antd";
 import { FileTextTwoTone, DownloadOutlined, CheckCircleFilled, CloseCircleFilled, CloseSquareFilled, CheckSquareFilled } from "@ant-design/icons";
 import { saveAs } from "file-saver";
+import moment from "moment";
 
 const InternshipInfo = () => {
   const supervisorId = useSelector((state) => state.auth.userId);
@@ -17,7 +18,8 @@ const InternshipInfo = () => {
     const fetchInternships = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/supervisors/${supervisorId}/internships`);
-        setDataSource(response.data);
+        console.log(response.data);
+        setDataSource(response.data.internships);
       } catch (error) {
         console.error("Failed to fetch internships:", error);
       }
@@ -34,14 +36,34 @@ const InternshipInfo = () => {
     },
     {
       key: "2",
+      title: "Company",
+      dataIndex: "companyName",
+    },
+    {
+      key: "3",
+      title: "Start Date",
+      dataIndex: "startDate",
+      render: (startDate) => moment(startDate).format("YYYY-MM-DD"),
+    },
+    {
+      key: "4",
+      title: "End Date",
+      dataIndex: "endDate",
+      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
+    },
+    {
+      key: "5",
       title: "Download Internship Book",
-
       render: (record) => (
         <>
-          <Radio.Group value={size} onChange={(e) => setSize(e.target.value)}>
-          </Radio.Group>
+          <Radio.Group value={size} onChange={(e) => setSize(e.target.value)}></Radio.Group>
           <Space direction="vertical">
-            <Button type="primary" icon={<DownloadOutlined />} size={size} onClick={() => downloadInternshipBook(record.internshipBook)}>
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              size={size}
+              onClick={() => downloadInternshipBook(record.internshipBook)}
+            >
               Download
             </Button>
           </Space>
@@ -49,33 +71,22 @@ const InternshipInfo = () => {
       ),
     },
     {
-      key: "3",
+      key: "6",
       title: "Approve of Internship Book",
       render: (record) => (
         <Space className="flex flex-wrap  gap-4">
           {record.status === "APPROVED" ? (
             <div className="flex items-center">
-              <CheckCircleFilled
-                className="text-green-500"
-                style={{ fontSize: "20px" }}
-              />
+              <CheckCircleFilled className="text-green-500" style={{ fontSize: "20px" }} />
               <span className="ml-2">{record.status}</span>
             </div>
           ) : record.status === "REJECTED" ? (
             <div className="flex items-center">
-              <CloseCircleFilled
-                className="text-red-500"
-                style={{ fontSize: "20px" }}
-              />
+              <CloseCircleFilled className="text-red-500" style={{ fontSize: "20px" }} />
               <span className="ml-2">{record.status}</span>
             </div>
           ) : (
-            <Button
-              type="link"
-              onClick={() => {
-                setModalVisible(record.id);
-              }}
-            >
+            <Button type="link" onClick={() => setModalVisible(record.id)}>
               <FileTextTwoTone style={{ fontSize: 25 }} />
             </Button>
           )}
@@ -83,7 +94,7 @@ const InternshipInfo = () => {
       ),
     },
     {
-      key: "4",
+      key: "7",
       title: "Download Evaluation Form",
       render: (record) => (
         <>
@@ -101,39 +112,26 @@ const InternshipInfo = () => {
         </>
       ),
     },
-
     {
-      key: "5",
+      key: "8",
       title: "Approve",
       render: (record) => (
-        <Button
-          onClick={() => {
-            onApproveStudent(record);
-          }}
-          type="link"
-        >
+        <Button onClick={() => onApproveStudent(record)} type="link">
           <CheckSquareFilled style={{ color: "green", fontSize: 35 }} />
         </Button>
       ),
     },
     {
-      key: "6",
+      key: "9",
       title: "Reject",
       render: (record) => (
-        <Button
-          type="link"
-          onClick={() => {
-            onRejectStudent(record);
-          }}
-        >
-          <CloseSquareFilled
-            style={{ color: "red", fontSize: 35 }}
-          />
+        <Button type="link" onClick={() => onRejectStudent(record)}>
+          <CloseSquareFilled style={{ color: "red", fontSize: 35 }} />
         </Button>
-
       ),
     },
   ];
+
   const onApproveStudent = (record) => {
     Modal.confirm({
       title: "Are you sure you want to approve this internship?",
